@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="pqu3Xf" name="blankJuce" projectType="guiapp" version="1.0.0"
+              bundleIdentifier="com.yourcompany.blankJuce" includeBinaryInAppConfig="1"
+              jucerVersion="4.3.0">
+  <MAINGROUP id="mWCYd0" name="blankJuce">
+    <GROUP id="{F6BE8892-0AED-4C1B-249D-32C89738D6BF}" name="Source">
+      <GROUP id="{52FDEC98-2815-82A7-15AD-D643AC175724}" name="Maximilian">
+        <GROUP id="{B470AE0F-765A-CF8F-509E-C0514E6C0340}" name="libs">
+          <FILE id="xdch7o" name="fft.cpp" compile="1" resource="0" file="Source/Maximilian/libs/fft.cpp"/>
+          <FILE id="LYaEH8" name="fft.h" compile="0" resource="0" file="Source/Maximilian/libs/fft.h"/>
+          <FILE id="gS2UuE" name="maxiFFT.cpp" compile="1" resource="0" file="Source/Maximilian/libs/maxiFFT.cpp"/>
+          <FILE id="hMZ9cX" name="maxiFFT.h" compile="0" resource="0" file="Source/Maximilian/libs/maxiFFT.h"/>
+          <FILE id="AQzlew" name="maxiMFCC.cpp" compile="1" resource="0" file="Source/Maximilian/libs/maxiMFCC.cpp"/>
+          <FILE id="jnnlhC" name="maxiMFCC.h" compile="0" resource="0" file="Source/Maximilian/libs/maxiMFCC.h"/>
+          <FILE id="CDsMRy" name="sineTable.h" compile="0" resource="0" file="Source/Maximilian/libs/sineTable.h"/>
+        </GROUP>
+        <FILE id="YB0yAX" name="maximilian.cpp" compile="1" resource="0" file="Source/Maximilian/maximilian.cpp"/>
+        <FILE id="hW3rio" name="maximilian.h" compile="0" resource="0" file="Source/Maximilian/maximilian.h"/>
+      </GROUP>
+      <FILE id="OA1laG" name="PatchGenerator.cpp" compile="1" resource="0"
+            file="Source/PatchGenerator.cpp"/>
+      <FILE id="e3xA3B" name="PatchGenerator.h" compile="0" resource="0"
+            file="Source/PatchGenerator.h"/>
+      <FILE id="E4y4tQ" name="RenderEngine.cpp" compile="1" resource="0"
+            file="Source/RenderEngine.cpp"/>
+      <FILE id="G7s4ZO" name="RenderEngine.h" compile="0" resource="0" file="Source/RenderEngine.h"/>
+      <FILE id="izDIPu" name="source.cpp" compile="1" resource="0" file="Source/source.cpp"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="blankJuce"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="blankJuce"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce/JUCE/modules"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+    <QT_CREATOR targetFolder="Builds/QtCreator">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
+                       targetName="blankJuce"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="3"
+                       targetName="blankJuce"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce/JUCE/modules"/>
+      </MODULEPATHS>
+    </QT_CREATOR>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_PLUGINHOST_VST="enabled" JUCE_PLUGINHOST_VST3="enabled"/>
+</JUCERPROJECT>
