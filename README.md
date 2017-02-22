@@ -19,7 +19,58 @@ This library is a work in progress for my final year project where I am using Ne
 
 ### Building / Installation
 
-Currently this Python libary is only available for Linux machines. I need your help getting this working on Windows and Mac too - testing and patches are really appreciated! The code should compile on all operating systems, however I have only written a makefile that I know works on Linux. To build the library for linux, change directory to Builds/LinuxMakefile/ and run make.
+Currently this Python libary is only available for Linux machines. I need your help getting this working on Windows and Mac too - testing and patches are really appreciated! The code should compile on all operating systems, however I have only written a makefile that I know works on Linux. It is a priotity for me to have this project easy to compile on all platforms.
+
+Firstly, you will need the boost library (specifically the python headers) for this code to compile.
+
+Ubuntu:
+```
+sudo apt-get install libboost-all-dev
+```
+
+Arch:
+```
+sudo pacman -Ss boost
+```
+
+Fedora:
+```
+sudo yum install boost-devel
+```
+
+If your distribution's package manager doesn't have boost, [you can get the headers from here.](http://www.boost.org/doc/libs/1_47_0/more/getting_started/unix-variants.html)
+The next thing you will need to obtain is the VST SDK. Obtain it from here, and ensure its install to the folder "~/SDKs/". The final path into the vst folder should look like "~/SDKs/VST SDK/". It must be installed correctly so JUCE can be correctly find the sdk.
+
+Juce itself has a list of dependancies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out! Depending on your distribution and setup you may already have some / all of the following libraries. If you are on Ubuntu, the following commands will install your dependancies. Find the respective packages for other distros using google please!
+
+```
+sudo apt-get -y install llvm
+sudo apt-get -y install clang
+sudo apt-get -y install libfreetype6-dev
+sudo apt-get -y install libx11-dev
+sudo apt-get -y install libxinerama-dev
+sudo apt-get -y install libxrandr-dev
+sudo apt-get -y install libxcursor-dev
+sudo apt-get -y install mesa-common-dev
+sudo apt-get -y install libasound2-dev
+sudo apt-get -y install freeglut3-dev
+sudo apt-get -y install libxcomposite-dev
+sudo apt-get -y install libcurl4-gnutls-dev
+```
+
+Well done! You've made it this far! Should you still have problems, a good place to start is the JUCE forums, particularly [here](https://forum.juce.com/t/juce-4-2-1-setup-on-apt-based-linux-ubuntu-16-04-lts-mint-elementary-os-freya/17164) and [here](https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121). Feel free to drop me a note with an error and I'll happily scratch my head over it but you may get better results in the forums!
+
+So to now build the library for linux, change directory to Builds/LinuxMakefile/ and run simply run make.
+
+Change directory into the build folder and run:
+```
+python
+```
+Once in interactive mode, run:
+```
+import renderman as rm
+```
+If this doesn't spit out errors, congratulations! Enjoy RenderMan. :)
 
 These instructions will change relatively soon as soon as I work out a more sensible building process, and the aim will be to have a pip package sorted fairly soon.
 
