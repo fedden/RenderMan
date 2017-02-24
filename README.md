@@ -68,7 +68,7 @@ python
 ```
 Once in interactive mode, run:
 ```
-import renderman as rm
+import librenderman as rm
 ```
 If this doesn't spit out errors, congratulations! Enjoy RenderMan. :)
 
