@@ -28,10 +28,12 @@
     <FILE id="PqgGm9" name="source.cpp" compile="1" resource="0" file="Source/source.cpp"/>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX">
+    <XCODE_MAC targetFolder="Builds/MacOSX" vst3Folder="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="renderman"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="renderman"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="renderman"
+                       osxCompatibility="10.7 SDK" osxArchitecture="64BitUniversal"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="renderman"
+                       osxCompatibility="10.7 SDK" osxArchitecture="64BitUniversal"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
