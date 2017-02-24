@@ -204,4 +204,4 @@ Finally, doing something cool with this library? Let me know what you are up to!
 
 Thanks for reading this far, you rock!
 
-![](http://i.giphy.com/100QWMdxQJzQC4.gif)
+![](https://media.giphy.com/media/100QWMdxQJzQC4/giphy.gif)
