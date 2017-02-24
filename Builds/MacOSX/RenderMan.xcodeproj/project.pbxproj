@@ -200,9 +200,11 @@
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0", );
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "../../JuceLibraryCode/modules", "\"-I /usr/local/include\"", "$(inherited)");
+				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "../../JuceLibraryCode/modules", "/usr/include/python2.7", "$(inherited)");
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				OTHER_CPLUSPLUSFLAGS = "-fPIC";
+				OTHER_LDFLAGS = "-shared -lpython2.7 -lboost_python";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.RenderMan;
 				SDKROOT_ppc = macosx10.5; }; name = Debug; };
 		7D16F0F72A8F9DD6F7543FE8 = {isa = XCBuildConfiguration; buildSettings = {
@@ -229,9 +231,11 @@
 					"JucePlugin_Build_Standalone=0", );
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "../../JuceLibraryCode/modules", "\"-I /usr/local/include\"", "$(inherited)");
+				HEADER_SEARCH_PATHS = ("\"~/SDKs/VST3 SDK\"", "../../JuceLibraryCode", "../../JuceLibraryCode/modules", "/usr/include/python2.7", "$(inherited)");
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
+				OTHER_CPLUSPLUSFLAGS = "-fPIC";
+				OTHER_LDFLAGS = "-shared -lpython2.7 -lboost_python";
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.RenderMan;
 				SDKROOT_ppc = macosx10.5; }; name = Release; };
 		388E0877B649AC3D789978C4 = {isa = XCBuildConfiguration; buildSettings = {
