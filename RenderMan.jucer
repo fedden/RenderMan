@@ -31,9 +31,11 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="renderman"
-                       osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"/>
+                       osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"
+                       headerPath=" -I /usr/local/include"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="renderman"
-                       osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"/>
+                       osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"
+                       headerPath=" -I /usr/local/include"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
@@ -51,7 +53,7 @@
         <MODULEPATH id="juce_audio_processors" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2015 targetFolder="Builds/VisualStudio2015">
+    <VS2015 targetFolder="Builds/VisualStudio2015" vst3Folder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="renderman"/>
