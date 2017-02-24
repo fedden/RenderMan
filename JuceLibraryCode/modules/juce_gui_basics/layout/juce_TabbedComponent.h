@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_TABBEDCOMPONENT_H_INCLUDED
-#define JUCE_TABBEDCOMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -115,6 +114,11 @@ public:
 
     /** Gets rid of one of the tabs. */
     void removeTab (int tabIndex);
+
+    /** Moves a tab to a new index in the list.
+        Pass -1 as the index to move it to the end of the list.
+    */
+    void moveTab (int currentIndex, int newIndex, bool animate = false);
 
     /** Returns the number of tabs in the bar. */
     int getNumTabs() const;
@@ -215,6 +219,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent)
 };
-
-
-#endif   // JUCE_TABBEDCOMPONENT_H_INCLUDED

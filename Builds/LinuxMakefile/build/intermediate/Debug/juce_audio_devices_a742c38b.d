@@ -108,6 +108,7 @@ build/intermediate/Debug/juce_audio_devices_a742c38b.o: \
  ../../JuceLibraryCode/modules/juce_core/network/juce_NamedPipe.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_Socket.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_URL.h \
+ ../../JuceLibraryCode/modules/juce_core/network/juce_WebInputStream.h \
  ../../JuceLibraryCode/modules/juce_core/time/juce_PerformanceCounter.h \
  ../../JuceLibraryCode/modules/juce_core/unit_tests/juce_UnitTest.h \
  ../../JuceLibraryCode/modules/juce_core/xml/juce_XmlDocument.h \
@@ -136,7 +137,7 @@ build/intermediate/Debug/juce_audio_devices_a742c38b.o: \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnection.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_ConnectedChildProcess.h \
- ../../JuceLibraryCode/modules/juce_events/native/juce_ScopedXLock.h \
+ ../../JuceLibraryCode/modules/juce_events/native/juce_linux_EventLoop.h \
  ../../JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
  ../../JuceLibraryCode/modules/juce_audio_basics/buffers/juce_AudioDataConverters.h \
  ../../JuceLibraryCode/modules/juce_audio_basics/buffers/juce_FloatVectorOperations.h \

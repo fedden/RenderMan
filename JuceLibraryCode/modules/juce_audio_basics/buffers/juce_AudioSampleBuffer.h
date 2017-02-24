@@ -2,28 +2,33 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   ------------------------------------------------------------------------------
+   -----------------------------------------------------------------------------
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
-#define JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -184,14 +189,45 @@ public:
     */
     ~AudioBuffer() noexcept {}
 
+    /** Move constructor */
+    AudioBuffer (AudioBuffer&& other) noexcept
+        : numChannels (other.numChannels),
+          size (other.size),
+          allocatedBytes (other.allocatedBytes),
+          channels (other.channels),
+          allocatedData (static_cast<HeapBlock<char, true>&&> (other.allocatedData)),
+          isClear (other.isClear)
+    {
+        memcpy (preallocatedChannelSpace, other.preallocatedChannelSpace, sizeof (preallocatedChannelSpace));
+        other.numChannels = 0;
+        other.size = 0;
+        other.allocatedBytes = 0;
+    }
+
+    /** Move assignment */
+    AudioBuffer& operator= (AudioBuffer&& other) noexcept
+    {
+        numChannels = other.numChannels;
+        size = other.size;
+        allocatedBytes = other.allocatedBytes;
+        channels = other.channels;
+        allocatedData = static_cast<HeapBlock<char, true>&&> (other.allocatedData);
+        isClear = other.isClear;
+        memcpy (preallocatedChannelSpace, other.preallocatedChannelSpace, sizeof (preallocatedChannelSpace));
+        other.numChannels = 0;
+        other.size = 0;
+        other.allocatedBytes = 0;
+        return *this;
+    }
+
     //==============================================================================
     /** Returns the number of channels of audio data that this buffer contains.
-        @see getSampleData
+        @see getNumSamples, getReadPointer, getWritePointer
     */
     int getNumChannels() const noexcept                             { return numChannels; }
 
     /** Returns the number of samples allocated in each of the buffer's channels.
-        @see getSampleData
+        @see getNumChannels, getReadPointer, getWritePointer
     */
     int getNumSamples() const noexcept                              { return size; }
 
@@ -369,11 +405,13 @@ public:
                                 it when the buffer is deleted or resized.
         @param newNumChannels   the number of channels to use - this must correspond to the
                                 number of elements in the array passed in
+        @param newStartSample   the offset within the arrays at which the data begins
         @param newNumSamples    the number of samples to use - this must correspond to the
                                 size of the arrays passed in
     */
     void setDataToReferTo (Type** dataToReferTo,
                            const int newNumChannels,
+                           const int newStartSample,
                            const int newNumSamples) noexcept
     {
         jassert (dataToReferTo != nullptr);
@@ -388,8 +426,33 @@ public:
         numChannels = newNumChannels;
         size = newNumSamples;
 
-        allocateChannels (dataToReferTo, 0);
+        allocateChannels (dataToReferTo, newStartSample);
         jassert (! isClear);
+    }
+
+    /** Makes this buffer point to a pre-allocated set of channel data arrays.
+
+        There's also a constructor that lets you specify arrays like this, but this
+        lets you change the channels dynamically.
+
+        Note that if the buffer is resized or its number of channels is changed, it
+        will re-allocate memory internally and copy the existing data to this new area,
+        so it will then stop directly addressing this memory.
+
+        @param dataToReferTo    a pre-allocated array containing pointers to the data
+                                for each channel that should be used by this buffer. The
+                                buffer will only refer to this memory, it won't try to delete
+                                it when the buffer is deleted or resized.
+        @param newNumChannels   the number of channels to use - this must correspond to the
+                                number of elements in the array passed in
+        @param newNumSamples    the number of samples to use - this must correspond to the
+                                size of the arrays passed in
+    */
+    void setDataToReferTo (Type** dataToReferTo,
+                           const int newNumChannels,
+                           const int newNumSamples) noexcept
+    {
+        setDataToReferTo (dataToReferTo, newNumChannels, 0, newNumSamples);
     }
 
     /** Resizes this buffer to match the given one, and copies all of its content across.
@@ -1068,6 +1131,3 @@ private:
     @see AudioBuffer
 */
 typedef AudioBuffer<float> AudioSampleBuffer;
-
-
-#endif   // JUCE_AUDIOSAMPLEBUFFER_H_INCLUDED

@@ -2,28 +2,33 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   ------------------------------------------------------------------------------
+   -----------------------------------------------------------------------------
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIODATACONVERTERS_H_INCLUDED
-#define JUCE_AUDIODATACONVERTERS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -365,7 +370,7 @@ public:
         {
             // If you're using interleaved data, call the other constructor! If you're using non-interleaved data,
             // you should pass NonInterleaved as the template parameter for the interleaving type!
-            static_jassert (InterleavingType::isInterleavedType == 0);
+            static_assert (InterleavingType::isInterleavedType == 0, "Incorrect constructor for interleaved data");
         }
 
         /** Creates a pointer from some raw data in the appropriate format with the specified number of interleaved channels.
@@ -405,7 +410,8 @@ public:
         */
         inline void setAsFloat (float newValue) noexcept
         {
-            static_jassert (Constness::isConst == 0); // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            static_assert (Constness::isConst == 0, "Attempt to write to a const pointer");
             Endianness::setAsFloat (data, newValue);
         }
 
@@ -422,7 +428,8 @@ public:
         */
         inline void setAsInt32 (int32 newValue) noexcept
         {
-            static_jassert (Constness::isConst == 0); // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+             // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            static_assert (Constness::isConst == 0, "Attempt to write to a const pointer");
             Endianness::setAsInt32 (data, newValue);
         }
 
@@ -440,7 +447,8 @@ public:
         */
         void convertSamples (Pointer source, int numSamples) const noexcept
         {
-            static_jassert (Constness::isConst == 0); // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            static_assert (Constness::isConst == 0, "Attempt to write to a const pointer");
 
             for (Pointer dest (*this); --numSamples >= 0;)
             {
@@ -456,7 +464,8 @@ public:
         template <class OtherPointerType>
         void convertSamples (OtherPointerType source, int numSamples) const noexcept
         {
-            static_jassert (Constness::isConst == 0); // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            // trying to write to a const pointer! For a writeable one, use AudioData::NonConst instead!
+            static_assert (Constness::isConst == 0, "Attempt to write to a const pointer");
 
             Pointer dest (*this);
 
@@ -707,6 +716,3 @@ private:
     AudioDataConverters();
     JUCE_DECLARE_NON_COPYABLE (AudioDataConverters)
 };
-
-
-#endif   // JUCE_AUDIODATACONVERTERS_H_INCLUDED

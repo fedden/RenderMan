@@ -197,9 +197,9 @@ namespace AiffFileHelpers
     {
         static bool isValidTag (const char* d) noexcept
         {
-            return CharacterFunctions::isLetterOrDigit (d[0]) && CharacterFunctions::isUpperCase (d[0])
-                && CharacterFunctions::isLetterOrDigit (d[1]) && CharacterFunctions::isLowerCase (d[1])
-                && CharacterFunctions::isLetterOrDigit (d[2]) && CharacterFunctions::isLowerCase (d[2]);
+            return CharacterFunctions::isLetterOrDigit (d[0]) && CharacterFunctions::isUpperCase (static_cast<juce_wchar> (d[0]))
+                && CharacterFunctions::isLetterOrDigit (d[1]) && CharacterFunctions::isLowerCase (static_cast<juce_wchar> (d[1]))
+                && CharacterFunctions::isLetterOrDigit (d[2]) && CharacterFunctions::isLowerCase (static_cast<juce_wchar> (d[2]));
         }
 
         static bool isAppleGenre (const String& tag) noexcept
@@ -983,12 +983,17 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
 
 MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (const File& file)
 {
-    if (FileInputStream* fin = file.createInputStream())
+    return createMemoryMappedReader (file.createInputStream());
+}
+
+MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (FileInputStream* fin)
+{
+    if (fin != nullptr)
     {
         AiffAudioFormatReader reader (fin);
 
         if (reader.lengthInSamples > 0)
-            return new MemoryMappedAiffReader (file, reader);
+            return new MemoryMappedAiffReader (fin->getFile(), reader);
     }
 
     return nullptr;

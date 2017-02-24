@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LINE_H_INCLUDED
-#define JUCE_LINE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -249,9 +248,9 @@ public:
                                     can be negative or greater than 1.0).
         @see getPointAlongLine
     */
-    Point<ValueType> getPointAlongLineProportionally (ValueType proportionOfLength) const noexcept
+    Point<ValueType> getPointAlongLineProportionally (typename Point<ValueType>::FloatType proportionOfLength) const noexcept
     {
-        return start + (end - start) * proportionOfLength;
+        return start + Point<ValueType> ((end - start) * proportionOfLength);
     }
 
     /** Returns the smallest distance between this line segment and a given point.
@@ -425,6 +424,3 @@ private:
         return along2 >= 0 && along2 <= static_cast<ValueType> (1);
     }
 };
-
-
-#endif   // JUCE_LINE_H_INCLUDED

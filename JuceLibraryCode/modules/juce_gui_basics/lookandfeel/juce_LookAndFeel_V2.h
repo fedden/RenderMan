@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_LOOKANDFEEL_V2_H_INCLUDED
-#define JUCE_LOOKANDFEEL_V2_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -66,6 +65,8 @@ public:
 
     void drawAlertBox (Graphics&, AlertWindow&, const Rectangle<int>& textArea, TextLayout&) override;
     int getAlertBoxWindowFlags() override;
+
+    Array<int> getWidthsForTextButtons (AlertWindow&, const Array<TextButton*>&) override;
     int getAlertWindowButtonHeight() override;
 
     /** Override this function to supply a custom font for the alert window title.
@@ -364,6 +365,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel_V2)
 };
-
-
-#endif   // JUCE_LOOKANDFEEL_V2_H_INCLUDED

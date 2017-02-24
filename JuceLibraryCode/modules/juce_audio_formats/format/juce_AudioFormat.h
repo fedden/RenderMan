@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_AUDIOFORMAT_H_INCLUDED
-#define JUCE_AUDIOFORMAT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -112,6 +111,7 @@ public:
         If the format does not support this, the method will return nullptr;
     */
     virtual MemoryMappedAudioFormatReader* createMemoryMappedReader (const File& file);
+    virtual MemoryMappedAudioFormatReader* createMemoryMappedReader (FileInputStream* fin);
 
     /** Tries to create an object that can write to a stream with this audio format.
 
@@ -173,6 +173,3 @@ private:
     String formatName;
     StringArray fileExtensions;
 };
-
-
-#endif   // JUCE_AUDIOFORMAT_H_INCLUDED

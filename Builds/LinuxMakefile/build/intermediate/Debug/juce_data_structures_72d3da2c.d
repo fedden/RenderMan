@@ -107,6 +107,7 @@ build/intermediate/Debug/juce_data_structures_72d3da2c.o: \
  ../../JuceLibraryCode/modules/juce_core/network/juce_NamedPipe.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_Socket.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_URL.h \
+ ../../JuceLibraryCode/modules/juce_core/network/juce_WebInputStream.h \
  ../../JuceLibraryCode/modules/juce_core/time/juce_PerformanceCounter.h \
  ../../JuceLibraryCode/modules/juce_core/unit_tests/juce_UnitTest.h \
  ../../JuceLibraryCode/modules/juce_core/xml/juce_XmlDocument.h \
@@ -135,7 +136,7 @@ build/intermediate/Debug/juce_data_structures_72d3da2c.o: \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnection.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_ConnectedChildProcess.h \
- ../../JuceLibraryCode/modules/juce_events/native/juce_ScopedXLock.h \
+ ../../JuceLibraryCode/modules/juce_events/native/juce_linux_EventLoop.h \
  ../../JuceLibraryCode/modules/juce_data_structures/undomanager/juce_UndoableAction.h \
  ../../JuceLibraryCode/modules/juce_data_structures/undomanager/juce_UndoManager.h \
  ../../JuceLibraryCode/modules/juce_data_structures/values/juce_Value.h \

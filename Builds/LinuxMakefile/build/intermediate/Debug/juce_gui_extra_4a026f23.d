@@ -109,6 +109,7 @@ build/intermediate/Debug/juce_gui_extra_4a026f23.o: \
  ../../JuceLibraryCode/modules/juce_core/network/juce_NamedPipe.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_Socket.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_URL.h \
+ ../../JuceLibraryCode/modules/juce_core/network/juce_WebInputStream.h \
  ../../JuceLibraryCode/modules/juce_core/time/juce_PerformanceCounter.h \
  ../../JuceLibraryCode/modules/juce_core/unit_tests/juce_UnitTest.h \
  ../../JuceLibraryCode/modules/juce_core/xml/juce_XmlDocument.h \
@@ -138,7 +139,7 @@ build/intermediate/Debug/juce_gui_extra_4a026f23.o: \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnection.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_ConnectedChildProcess.h \
- ../../JuceLibraryCode/modules/juce_events/native/juce_ScopedXLock.h \
+ ../../JuceLibraryCode/modules/juce_events/native/juce_linux_EventLoop.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_AffineTransform.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_Point.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_Line.h \
@@ -309,6 +310,7 @@ build/intermediate/Debug/juce_gui_extra_4a026f23.o: \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V2.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V1.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/native/juce_linux_X11.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_FlexItem.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_FlexBox.h \
  ../../JuceLibraryCode/modules/juce_gui_extra/documents/juce_FileBasedDocument.h \
@@ -337,7 +339,6 @@ build/intermediate/Debug/juce_gui_extra_4a026f23.o: \
  ../../JuceLibraryCode/modules/juce_gui_extra/code_editor/juce_CodeDocument.cpp \
  ../../JuceLibraryCode/modules/juce_gui_extra/code_editor/juce_CodeEditorComponent.cpp \
  ../../JuceLibraryCode/modules/juce_gui_extra/code_editor/juce_CPlusPlusCodeTokeniser.cpp \
- ../../JuceLibraryCode/modules/juce_gui_extra/code_editor/juce_CPlusPlusCodeTokeniserFunctions.h \
  ../../JuceLibraryCode/modules/juce_gui_extra/code_editor/juce_XMLCodeTokeniser.cpp \
  ../../JuceLibraryCode/modules/juce_gui_extra/code_editor/juce_LuaCodeTokeniser.cpp \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_BubbleMessageComponent.cpp \
@@ -349,5 +350,5 @@ build/intermediate/Debug/juce_gui_extra_4a026f23.o: \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_SystemTrayIconComponent.cpp \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_LiveConstantEditor.cpp \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_AnimatedAppComponent.cpp \
- ../../JuceLibraryCode/modules/juce_gui_extra/native/juce_linux_WebBrowserComponent.cpp \
- ../../JuceLibraryCode/modules/juce_gui_extra/native/juce_linux_SystemTrayIcon.cpp
+ ../../JuceLibraryCode/modules/juce_gui_extra/native/juce_linux_X11_WebBrowserComponent.cpp \
+ ../../JuceLibraryCode/modules/juce_gui_extra/native/juce_linux_X11_SystemTrayIcon.cpp

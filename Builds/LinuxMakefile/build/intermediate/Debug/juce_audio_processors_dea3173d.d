@@ -109,6 +109,7 @@ build/intermediate/Debug/juce_audio_processors_dea3173d.o: \
  ../../JuceLibraryCode/modules/juce_core/network/juce_NamedPipe.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_Socket.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_URL.h \
+ ../../JuceLibraryCode/modules/juce_core/network/juce_WebInputStream.h \
  ../../JuceLibraryCode/modules/juce_core/time/juce_PerformanceCounter.h \
  ../../JuceLibraryCode/modules/juce_core/unit_tests/juce_UnitTest.h \
  ../../JuceLibraryCode/modules/juce_core/xml/juce_XmlDocument.h \
@@ -138,7 +139,7 @@ build/intermediate/Debug/juce_audio_processors_dea3173d.o: \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnection.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_ConnectedChildProcess.h \
- ../../JuceLibraryCode/modules/juce_events/native/juce_ScopedXLock.h \
+ ../../JuceLibraryCode/modules/juce_events/native/juce_linux_EventLoop.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_AffineTransform.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_Point.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_Line.h \
@@ -309,6 +310,7 @@ build/intermediate/Debug/juce_audio_processors_dea3173d.o: \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V2.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V1.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/native/juce_linux_X11.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_FlexItem.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_FlexBox.h \
  ../../JuceLibraryCode/modules/juce_audio_basics/juce_audio_basics.h \
@@ -367,12 +369,12 @@ build/intermediate/Debug/juce_audio_processors_dea3173d.o: \
  ../../JuceLibraryCode/modules/juce_audio_processors/format_types/juce_VST3PluginFormat.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/scanning/juce_PluginDirectoryScanner.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/scanning/juce_PluginListComponent.h \
- ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioProcessorParameterWithID.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioParameterFloat.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioParameterInt.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioParameterBool.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioParameterChoice.h \
+ ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.h \
  ../../JuceLibraryCode/modules/juce_gui_extra/juce_gui_extra.h \
  ../../JuceLibraryCode/modules/juce_gui_extra/documents/juce_FileBasedDocument.h \
  ../../JuceLibraryCode/modules/juce_gui_extra/code_editor/juce_CodeDocument.h \
@@ -406,7 +408,6 @@ build/intermediate/Debug/juce_audio_processors_dea3173d.o: \
  ../../JuceLibraryCode/modules/juce_audio_processors/format_types/juce_LADSPAPluginFormat.cpp \
  ../../JuceLibraryCode/modules/juce_audio_processors/format_types/juce_VSTPluginFormat.cpp \
  ../../JuceLibraryCode/modules/juce_audio_processors/format_types/juce_VSTInterface.h \
- ../../JuceLibraryCode/modules/juce_audio_processors/format_types/../../juce_core/juce_core.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/format_types/juce_VSTCommon.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/format_types/juce_VSTMidiEventList.h \
  ../../JuceLibraryCode/modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp \
@@ -414,5 +415,5 @@ build/intermediate/Debug/juce_audio_processors_dea3173d.o: \
  ../../JuceLibraryCode/modules/juce_audio_processors/scanning/juce_KnownPluginList.cpp \
  ../../JuceLibraryCode/modules/juce_audio_processors/scanning/juce_PluginDirectoryScanner.cpp \
  ../../JuceLibraryCode/modules/juce_audio_processors/scanning/juce_PluginListComponent.cpp \
- ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.cpp \
- ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioProcessorParameters.cpp
+ ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioProcessorParameters.cpp \
+ ../../JuceLibraryCode/modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.cpp

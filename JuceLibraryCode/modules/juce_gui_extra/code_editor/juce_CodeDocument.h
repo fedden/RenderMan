@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_CODEDOCUMENT_H_INCLUDED
-#define JUCE_CODEDOCUMENT_H_INCLUDED
+#pragma once
 
 class CodeDocumentLine;
 
@@ -59,7 +58,7 @@ public:
     class JUCE_API  Position
     {
     public:
-        /** Creates an uninitialised postion.
+        /** Creates an uninitialised position.
             Don't attempt to call any methods on this until you've given it an owner document
             to refer to!
         */
@@ -412,6 +411,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeDocument)
 };
-
-
-#endif   // JUCE_CODEDOCUMENT_H_INCLUDED

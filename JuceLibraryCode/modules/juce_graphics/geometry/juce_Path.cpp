@@ -157,7 +157,6 @@ Path& Path::operator= (const Path& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Path::Path (Path&& other) noexcept
     : data (static_cast<ArrayAllocationBase <float, DummyCriticalSection>&&> (other.data)),
       numElements (other.numElements),
@@ -174,7 +173,6 @@ Path& Path::operator= (Path&& other) noexcept
     useNonZeroWinding = other.useNonZeroWinding;
     return *this;
 }
-#endif
 
 bool Path::operator== (const Path& other) const noexcept
 {
@@ -1574,7 +1572,8 @@ void Path::restoreFromString (StringRef stringVersion)
 
 //==============================================================================
 Path::Iterator::Iterator (const Path& p) noexcept
-    : x1 (0), y1 (0), x2 (0), y2 (0), x3 (0), y3 (0),
+    : elementType (startNewSubPath),
+      x1 (0), y1 (0), x2 (0), y2 (0), x3 (0), y3 (0),
       path (p), index (0)
 {
 }

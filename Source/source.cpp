@@ -180,7 +180,7 @@ namespace wrap
 }
 
 //==============================================================================
-BOOST_PYTHON_MODULE(renderman)
+BOOST_PYTHON_MODULE(librenderman)
 {
     using namespace boost::python;
     using namespace wrap;

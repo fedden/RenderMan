@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_ALERTWINDOW_H_INCLUDED
-#define JUCE_ALERTWINDOW_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -435,6 +434,7 @@ public:
 
         virtual int getAlertBoxWindowFlags() = 0;
 
+        virtual Array<int> getWidthsForTextButtons (AlertWindow&, const Array<TextButton*>&) = 0;
         virtual int getAlertWindowButtonHeight() = 0;
 
         virtual Font getAlertWindowTitleFont() = 0;
@@ -484,5 +484,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindow)
 };
-
-#endif   // JUCE_ALERTWINDOW_H_INCLUDED

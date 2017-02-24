@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_VALUETREE_H_INCLUDED
-#define JUCE_VALUETREE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -92,9 +91,8 @@ public:
     /** Makes this object reference another node. */
     ValueTree& operator= (const ValueTree&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     ValueTree (ValueTree&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~ValueTree();
@@ -320,6 +318,11 @@ public:
     */
     ValueTree getParent() const noexcept;
 
+    /** Recusrively finds the highest-level parent node that contains this one.
+        If the node has no parent, this will return itself.
+    */
+    ValueTree getRoot() const noexcept;
+
     /** Returns one of this node's siblings in its parent's child list.
 
         The delta specifies how far to move through the list, so a value of 1 would return the node
@@ -483,6 +486,13 @@ public:
     /** Removes a listener that was previously added with addListener(). */
     void removeListener (Listener* listener);
 
+    /** Changes a named property of the node, but will not notify a specified listener of the change.
+        @see setProperty
+    */
+    ValueTree& setPropertyExcludingListener (Listener* listenerToExclude,
+                                             const Identifier& name, const var& newValue,
+                                             UndoManager* undoManager);
+
     /** Causes a property-change callback to be triggered for the specified property,
         calling any listeners that are registered.
     */
@@ -564,6 +574,3 @@ private:
 
     explicit ValueTree (SharedObject*) noexcept;
 };
-
-
-#endif   // JUCE_VALUETREE_H_INCLUDED

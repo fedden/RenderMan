@@ -22,13 +22,12 @@
   ==============================================================================
 */
 
-#ifndef JUCE_RECTANGLEPLACEMENT_H_INCLUDED
-#define JUCE_RECTANGLEPLACEMENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
 /**
-    Defines the method used to postion some kind of rectangular object within
+    Defines the method used to position some kind of rectangular object within
     a rectangular viewport.
 
     Although similar to Justification, this is more specific, and has some extra
@@ -168,5 +167,3 @@ private:
     //==============================================================================
     int flags;
 };
-
-#endif   // JUCE_RECTANGLEPLACEMENT_H_INCLUDED

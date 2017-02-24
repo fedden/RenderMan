@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS)
+#if JUCE_PLUGINHOST_VST
 
 //==============================================================================
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
@@ -39,10 +39,12 @@
  #define __cdecl
 #endif
 
-namespace
+namespace Vst2
 {
 #include "juce_VSTInterface.h"
 }
+
+using namespace Vst2;
 
 #include "juce_VSTCommon.h"
 
@@ -163,7 +165,7 @@ namespace
     {
        #if JUCE_WINDOWS
         return timeGetTime() * 1000000.0;
-       #elif JUCE_LINUX || JUCE_IOS
+       #elif JUCE_LINUX || JUCE_IOS || JUCE_ANDROID
         timeval micro;
         gettimeofday (&micro, 0);
         return micro.tv_usec * 1000.0;
@@ -222,14 +224,11 @@ static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface* effec
 //==============================================================================
 #if JUCE_LINUX
 
-extern Display* display;
-extern XContext windowHandleXContext;
-
 namespace
 {
     static bool xErrorTriggered = false;
 
-    static int temporaryErrorHandler (Display*, XErrorEvent*)
+    static int temporaryErrorHandler (::Display*, XErrorEvent*)
     {
         xErrorTriggered = true;
         return 0;
@@ -247,8 +246,13 @@ namespace
         unsigned char* data;
         Atom userType;
 
-        XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
-                            &userType,  &userSize, &userCount, &bytes, &data);
+        {
+            ScopedXDisplay xDisplay;
+            ::Display* display = xDisplay.get();
+
+            XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
+                                &userType,  &userSize, &userCount, &bytes, &data);
+        }
 
         XSetErrorHandler (oldErrorHandler);
 
@@ -261,7 +265,12 @@ namespace
         Window* childWindows;
         unsigned int numChildren = 0;
 
-        XQueryTree (display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+        {
+            ScopedXDisplay xDisplay;
+            ::Display* display = xDisplay.get();
+
+            XQueryTree (display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+        }
 
         if (numChildren > 0)
             return childWindows [0];
@@ -379,7 +388,7 @@ public:
     {
         getActiveModules().add (this);
 
-       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS
+       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS || JUCE_ANDROID
         fullParentDirectoryPathName = f.getParentDirectory().getFullPathName();
        #elif JUCE_MAC
         FSRef ref;
@@ -399,7 +408,7 @@ public:
     String fullParentDirectoryPathName;
    #endif
 
-  #if JUCE_WINDOWS || JUCE_LINUX
+  #if JUCE_WINDOWS || JUCE_LINUX || JUCE_ANDROID
     DynamicLibrary module;
 
     bool open()
@@ -954,7 +963,7 @@ public:
     }
 
     //==============================================================================
-   #if JUCE_IOS
+   #if JUCE_IOS || JUCE_ANDROID
     bool hasEditor() const override                  { return false; }
    #else
     bool hasEditor() const override                  { return vstEffect != nullptr && (vstEffect->flags & vstEffectFlagHasEditor) != 0; }
@@ -1125,75 +1134,28 @@ public:
     {
         switch (opcode)
         {
-            case hostOpcodeParameterChanged:         sendParamChangeMessageToListeners (index, opt); break;
-            case hostOpcodePreAudioProcessingEvents: handleMidiFromPlugin ((const VstEventBlock*) ptr); break;
+            case hostOpcodeParameterChanged:            sendParamChangeMessageToListeners (index, opt); break;
+            case hostOpcodePreAudioProcessingEvents:    handleMidiFromPlugin ((const VstEventBlock*) ptr); break;
+            case hostOpcodeGetTimingInfo:               return getVSTTime();
+            case hostOpcodeIdle:                        handleIdle(); break;
+            case hostOpcodeWindowSize:                  setWindowSize (index, (int) value); return 1;
+            case hostOpcodeUpdateView:                  triggerAsyncUpdate(); break;
+            case hostOpcodeIOModified:                  setLatencySamples (vstEffect->latency); break;
+            case hostOpcodeNeedsIdle:                   startTimer (50); break;
 
-           #if JUCE_MSVC
-            #pragma warning (push)
-            #pragma warning (disable: 4311)
-           #endif
-            case hostOpcodeGetTimingInfo: return (pointer_sized_int) &vstHostTime;
-           #if JUCE_MSVC
-            #pragma warning (pop)
-           #endif
+            case hostOpcodeGetSampleRate:               return (pointer_sized_int) (getSampleRate() > 0 ? getSampleRate() : defaultVSTSampleRateValue);
+            case hostOpcodeGetBlockSize:                return (pointer_sized_int) (getBlockSize() > 0  ? getBlockSize()  : defaultVSTBlockSizeValue);
+            case hostOpcodePlugInWantsMidi:             wantsMidiMessages = true; break;
+            case hostOpcodeGetDirectory:                return getVstDirectory();
 
-            case hostOpcodeIdle:
-                if (insideVSTCallback == 0 && MessageManager::getInstance()->isThisTheMessageThread())
-                {
-                    const IdleCallRecursionPreventer icrp;
+            case hostOpcodeTempoAt:                     return (pointer_sized_int) (extraFunctions != nullptr ? extraFunctions->getTempoAt ((int64) value) : 0);
+            case hostOpcodeGetAutomationState:          return (pointer_sized_int) (extraFunctions != nullptr ? extraFunctions->getAutomationState() : 0);
 
-                   #if JUCE_MAC
-                    if (getActiveEditor() != nullptr)
-                        dispatch (plugInOpcodeEditorIdle, 0, 0, 0, 0);
-                   #endif
+            case hostOpcodeParameterChangeGestureBegin: beginParameterChangeGesture (index); break;
+            case hostOpcodeParameterChangeGestureEnd:   endParameterChangeGesture (index); break;
 
-                    Timer::callPendingTimersSynchronously();
-
-                    handleUpdateNowIfNeeded();
-
-                    for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                        if (ComponentPeer* p = ComponentPeer::getPeer(i))
-                            p->performAnyPendingRepaintsNow();
-                }
-                break;
-
-            case hostOpcodeWindowSize:
-                if (AudioProcessorEditor* ed = getActiveEditor())
-                {
-                   #if JUCE_LINUX
-                    const MessageManagerLock mmLock;
-                   #endif
-                     ed->setSize (index, (int) value);
-                }
-
-                return 1;
-
-            case hostOpcodeUpdateView:      triggerAsyncUpdate(); break;
-            case hostOpcodeIOModified:          setLatencySamples (vstEffect->latency); break;
-            case hostOpcodeNeedsIdle:           startTimer (50); break;
-
-            case hostOpcodeGetSampleRate:       return (pointer_sized_int) (getSampleRate() > 0 ? getSampleRate() : defaultVSTSampleRateValue);
-            case hostOpcodeGetBlockSize:        return (pointer_sized_int) (getBlockSize() > 0  ? getBlockSize()  : defaultVSTBlockSizeValue);
-            case hostOpcodePlugInWantsMidi:     wantsMidiMessages = true; break;
-            case hostOpcodeGetDirectory:        return getVstDirectory();
-
-            case hostOpcodeTempoAt:
-                if (extraFunctions != nullptr)
-                    return (pointer_sized_int) extraFunctions->getTempoAt ((int64) value);
-
-                break;
-
-            case hostOpcodeGetAutomationState:
-                if (extraFunctions != nullptr)
-                    return (pointer_sized_int) extraFunctions->getAutomationState();
-
-                break;
-
-            case hostOpcodePinConnected:
-                return isValidChannel (index, value == 0) ? 0 : 1; // (yes, 0 = true)
-
-            case hostOpcodeGetCurrentAudioProcessingLevel:
-                return isNonRealtime() ? 4 : 0;
+            case hostOpcodePinConnected:                    return isValidChannel (index, value == 0) ? 0 : 1; // (yes, 0 = true)
+            case hostOpcodeGetCurrentAudioProcessingLevel:  return isNonRealtime() ? 4 : 0;
 
             // none of these are handled (yet)...
             case hostOpcodeSetTime:
@@ -1214,8 +1176,6 @@ public:
             case hostOpcodeGetLanguage:
             case hostOpcodeOpenEditorWindow:
             case hostOpcodeCloseEditorWindow:
-            case hostOpcodeParameterChangeGestureBegin:
-            case hostOpcodeParameterChangeGestureEnd:
                 break;
 
             default:
@@ -1226,50 +1186,23 @@ public:
     }
 
     // handles non plugin-specific callbacks..
-    static pointer_sized_int handleGeneralCallback (int32 opcode, int32 /*index*/, pointer_sized_int /*value*/, void *ptr, float /*opt*/)
+    static pointer_sized_int handleGeneralCallback (int32 opcode, int32 /*index*/, pointer_sized_int /*value*/, void* ptr, float /*opt*/)
     {
         switch (opcode)
         {
-            case hostOpcodeCanHostDo:
-            {
-                static const char* canDos[] = { "supplyIdle",
-                                                "sendVstEvents",
-                                                "sendVstMidiEvent",
-                                                "sendVstTimeInfo",
-                                                "receiveVstEvents",
-                                                "receiveVstMidiEvent",
-                                                "supportShell",
-                                                "sizeWindow",
-                                                "shellCategory" };
-
-                for (int i = 0; i < numElementsInArray (canDos); ++i)
-                    if (strcmp (canDos[i], (const char*) ptr) == 0)
-                        return 1;
-
-                return 0;
-            }
-
-            case hostOpcodeVstVersion:                       return 2400;
-            case hostOpcodeCurrentId:                        return shellUIDToCreate;
-            case hostOpcodeGetNumberOfAutomatableParameters: return 0;
-            case hostOpcodeGetAutomationState:               return 1;
-            case hostOpcodeGetManufacturerVersion:           return 0x0101;
+            case hostOpcodeCanHostDo:                         return handleCanDo ((const char*) ptr);
+            case hostOpcodeVstVersion:                        return 2400;
+            case hostOpcodeCurrentId:                         return shellUIDToCreate;
+            case hostOpcodeGetNumberOfAutomatableParameters:  return 0;
+            case hostOpcodeGetAutomationState:                return 1;
+            case hostOpcodeGetManufacturerVersion:            return 0x0101;
 
             case hostOpcodeGetManufacturerName:
-            case hostOpcodeGetProductName:
-            {
-                String hostName ("Juce VST Host");
+            case hostOpcodeGetProductName:                    return getHostName ((char*) ptr);
 
-                if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
-                    hostName = app->getApplicationName();
-
-                hostName.copyToUTF8 ((char*) ptr, (size_t) jmin (vstMaxManufacturerStringLength, vstMaxPlugInNameStringLength) - 1);
-                break;
-            }
-
-            case hostOpcodeGetSampleRate:           return (pointer_sized_int) defaultVSTSampleRateValue;
-            case hostOpcodeGetBlockSize:            return (pointer_sized_int) defaultVSTBlockSizeValue;
-            case hostOpcodeSetOutputSampleRate:     return 0;
+            case hostOpcodeGetSampleRate:                     return (pointer_sized_int) defaultVSTSampleRateValue;
+            case hostOpcodeGetBlockSize:                      return (pointer_sized_int) defaultVSTBlockSizeValue;
+            case hostOpcodeSetOutputSampleRate:               return 0;
 
             default:
                 DBG ("*** Unhandled VST Callback: " + String ((int) opcode));
@@ -1553,8 +1486,83 @@ private:
     VSTMidiEventList midiEventsToSend;
     VstTimingInformation vstHostTime;
 
+    static pointer_sized_int handleCanDo (const char* name)
+    {
+        static const char* canDos[] = { "supplyIdle",
+                                        "sendVstEvents",
+                                        "sendVstMidiEvent",
+                                        "sendVstTimeInfo",
+                                        "receiveVstEvents",
+                                        "receiveVstMidiEvent",
+                                        "supportShell",
+                                        "sizeWindow",
+                                        "shellCategory" };
+
+        for (int i = 0; i < numElementsInArray (canDos); ++i)
+            if (strcmp (canDos[i], name) == 0)
+                return 1;
+
+        return 0;
+    }
+
+    static pointer_sized_int getHostName (char* name)
+    {
+        String hostName ("Juce VST Host");
+
+        if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
+            hostName = app->getApplicationName();
+
+        hostName.copyToUTF8 (name, (size_t) jmin (vstMaxManufacturerStringLength, vstMaxPlugInNameStringLength) - 1);
+        return 1;
+    }
+
+    pointer_sized_int getVSTTime() noexcept
+    {
+       #if JUCE_MSVC
+        #pragma warning (push)
+        #pragma warning (disable: 4311)
+       #endif
+
+        return (pointer_sized_int) &vstHostTime;
+
+       #if JUCE_MSVC
+        #pragma warning (pop)
+       #endif
+    }
+
+    void handleIdle()
+    {
+        if (insideVSTCallback == 0 && MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            const IdleCallRecursionPreventer icrp;
+
+           #if JUCE_MAC
+            if (getActiveEditor() != nullptr)
+                dispatch (plugInOpcodeEditorIdle, 0, 0, 0, 0);
+           #endif
+
+            Timer::callPendingTimersSynchronously();
+            handleUpdateNowIfNeeded();
+
+            for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+                if (ComponentPeer* p = ComponentPeer::getPeer(i))
+                    p->performAnyPendingRepaintsNow();
+        }
+    }
+
+    void setWindowSize (int width, int height)
+    {
+        if (AudioProcessorEditor* ed = getActiveEditor())
+        {
+           #if JUCE_LINUX
+            const MessageManagerLock mmLock;
+           #endif
+            ed->setSize (width, height);
+        }
+    }
+
     //==============================================================================
-    static VstEffectInterface* constructEffect(const ModuleHandle::Ptr& module)
+    static VstEffectInterface* constructEffect (const ModuleHandle::Ptr& module)
     {
         VstEffectInterface* effect = nullptr;
         try
@@ -1595,8 +1603,11 @@ private:
     {
         BusesProperties returnValue;
 
-        VstSpeakerConfiguration* inArr = nullptr, *outArr = nullptr;
-        if (effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0, reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) == 0)
+        HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
+
+       VstSpeakerConfiguration* inArr = inArrBlock.getData(), *outArr = outArrBlock.getData();
+        if (effect->numInputChannels == 0 ||
+            effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0, reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) == 0)
             inArr = outArr = nullptr;
 
         for (int dir = 0; dir < 2; ++dir)
@@ -1688,10 +1699,10 @@ private:
                     {
                         case AudioPlayHead::fps24:       setHostTimeFrameRate (0, 24.0,  position.timeInSeconds); break;
                         case AudioPlayHead::fps25:       setHostTimeFrameRate (1, 25.0,  position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 29.97, position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps30:       setHostTimeFrameRate (3, 30.0,  position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 29.97, position.timeInSeconds); break;
-                        case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 29.97, position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
                         default: break;
                     }
 
@@ -1990,7 +2001,7 @@ private:
 };
 
 //==============================================================================
-#if ! JUCE_IOS
+#if ! (JUCE_IOS || JUCE_ANDROID)
 class VSTPluginWindow;
 static Array<VSTPluginWindow*> activeVSTWindows;
 
@@ -2021,6 +2032,7 @@ public:
        #elif JUCE_LINUX
         pluginWindow = None;
         pluginProc = None;
+        display = XWindowSystem::getInstance()->displayRef();
 
        #elif JUCE_MAC
         ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
@@ -2049,6 +2061,8 @@ public:
         carbonWrapper = nullptr;
         #endif
         cocoaWrapper = nullptr;
+       #elif JUCE_LINUX
+        display = XWindowSystem::getInstance()->displayUnref();
        #endif
 
         activeVSTWindows.removeFirstMatchingValue (this);
@@ -2249,6 +2263,7 @@ private:
     void* originalWndProc;
     int sizeCheckCount;
    #elif JUCE_LINUX
+    ::Display* display;
     Window pluginWindow;
     EventProcPtr pluginProc;
    #endif
@@ -2739,7 +2754,7 @@ private:
 //==============================================================================
 AudioProcessorEditor* VSTPluginInstance::createEditor()
 {
-   #if JUCE_IOS
+   #if JUCE_IOS || JUCE_ANDROID
     return nullptr;
    #else
     return hasEditor() ? new VSTPluginWindow (*this)
@@ -2885,7 +2900,7 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
     return f.isDirectory() && f.hasFileExtension (".vst");
   #elif JUCE_WINDOWS
     return f.existsAsFile() && f.hasFileExtension (".dll");
-  #elif JUCE_LINUX
+  #elif JUCE_LINUX || JUCE_ANDROID
     return f.existsAsFile() && f.hasFileExtension (".so");
   #endif
 }
@@ -2941,7 +2956,7 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
    #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_ANDROID
     return FileSearchPath (SystemStats::getEnvironmentVariable ("VST_PATH",
                                                                 "/usr/lib/vst;/usr/local/lib/vst;~/.vst")
                              .replace (":", ";"));

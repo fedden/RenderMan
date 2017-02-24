@@ -105,6 +105,7 @@ build/intermediate/Debug/juce_core_75b14332.o: \
  ../../JuceLibraryCode/modules/juce_core/network/juce_NamedPipe.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_Socket.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_URL.h \
+ ../../JuceLibraryCode/modules/juce_core/network/juce_WebInputStream.h \
  ../../JuceLibraryCode/modules/juce_core/time/juce_PerformanceCounter.h \
  ../../JuceLibraryCode/modules/juce_core/unit_tests/juce_UnitTest.h \
  ../../JuceLibraryCode/modules/juce_core/xml/juce_XmlDocument.h \
@@ -116,6 +117,7 @@ build/intermediate/Debug/juce_core_75b14332.o: \
  ../../JuceLibraryCode/modules/juce_core/memory/juce_SharedResourcePointer.h \
  ../../JuceLibraryCode/modules/juce_core/containers/juce_AbstractFifo.cpp \
  ../../JuceLibraryCode/modules/juce_core/containers/juce_NamedValueSet.cpp \
+ ../../JuceLibraryCode/modules/juce_core/containers/juce_ListenerList.cpp \
  ../../JuceLibraryCode/modules/juce_core/containers/juce_PropertySet.cpp \
  ../../JuceLibraryCode/modules/juce_core/containers/juce_Variant.cpp \
  ../../JuceLibraryCode/modules/juce_core/files/juce_DirectoryIterator.cpp \
@@ -201,4 +203,5 @@ build/intermediate/Debug/juce_core_75b14332.o: \
  ../../JuceLibraryCode/modules/juce_core/native/juce_linux_Threads.cpp \
  ../../JuceLibraryCode/modules/juce_core/threads/juce_ChildProcess.cpp \
  ../../JuceLibraryCode/modules/juce_core/threads/juce_HighResolutionTimer.cpp \
- ../../JuceLibraryCode/modules/juce_core/network/juce_URL.cpp
+ ../../JuceLibraryCode/modules/juce_core/network/juce_URL.cpp \
+ ../../JuceLibraryCode/modules/juce_core/network/juce_WebInputStream.cpp

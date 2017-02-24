@@ -2,22 +2,28 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   ------------------------------------------------------------------------------
+   -----------------------------------------------------------------------------
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -49,6 +55,7 @@ import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import java.lang.Runnable;
+import java.lang.reflect.*;
 import java.util.*;
 import java.io.*;
 import java.net.URL;
@@ -56,8 +63,6 @@ import java.net.HttpURLConnection;
 import android.media.AudioManager;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.app.ActivityCompat;
 import android.Manifest;
 $$JuceAndroidMidiImports$$ // If you get an error here, you need to re-save your project with the Projucer!
 
@@ -114,7 +119,7 @@ public class JuceAppActivity   extends Activity
 
     public boolean isPermissionGranted (int permissionID)
     {
-        return ContextCompat.checkSelfPermission (this, getAndroidPermissionName (permissionID)) == PackageManager.PERMISSION_GRANTED;
+        return getApplicationContext().checkCallingOrSelfPermission (getAndroidPermissionName (permissionID)) == PackageManager.PERMISSION_GRANTED;
     }
 
     private Map<Integer, Long> permissionCallbackPtrMap;
@@ -123,11 +128,11 @@ public class JuceAppActivity   extends Activity
     {
         String permissionName = getAndroidPermissionName (permissionID);
 
-        if (ContextCompat.checkSelfPermission (this, permissionName) != PackageManager.PERMISSION_GRANTED)
+        if (getApplicationContext().checkCallingOrSelfPermission (permissionName) != PackageManager.PERMISSION_GRANTED)
         {
             // remember callbackPtr, request permissions, and let onRequestPermissionResult call callback asynchronously
             permissionCallbackPtrMap.put (permissionID, ptrToCallback);
-            ActivityCompat.requestPermissions (this, new String[]{permissionName}, permissionID);
+            requestPermissionsCompat (new String[]{permissionName}, permissionID);
         }
         else
         {
@@ -287,6 +292,27 @@ public class JuceAppActivity   extends Activity
         try
         {
             actionBarHideMethod.invoke (actionBar);
+        }
+        catch (java.lang.IllegalArgumentException e) {}
+        catch (java.lang.IllegalAccessException e) {}
+        catch (java.lang.reflect.InvocationTargetException e) {}
+    }
+
+    void requestPermissionsCompat (String[] permissions, int requestCode)
+    {
+        Method requestPermissionsMethod = null;
+        try
+        {
+            requestPermissionsMethod = this.getClass().getMethod ("requestPermissions",
+                                                                  String[].class, int.class);
+        }
+        catch (SecurityException e)     { return; }
+        catch (NoSuchMethodException e) { return; }
+        if (requestPermissionsMethod == null) return;
+
+        try
+        {
+            requestPermissionsMethod.invoke (this, permissions, requestCode);
         }
         catch (java.lang.IllegalArgumentException e) {}
         catch (java.lang.IllegalAccessException e) {}
@@ -728,6 +754,26 @@ public class JuceAppActivity   extends Activity
         private native void focusChanged (long host, boolean hasFocus);
 
         public void setViewName (String newName)    {}
+
+        public void setSystemUiVisibilityCompat (int visibility)
+        {
+            Method systemUIVisibilityMethod = null;
+            try
+            {
+                systemUIVisibilityMethod = this.getClass().getMethod ("setSystemUiVisibility", int.class);
+            }
+            catch (SecurityException e)     { return; }
+            catch (NoSuchMethodException e) { return; }
+            if (systemUIVisibilityMethod == null) return;
+
+            try
+            {
+                systemUIVisibilityMethod.invoke (this, visibility);
+            }
+            catch (java.lang.IllegalArgumentException e) {}
+            catch (java.lang.IllegalAccessException e) {}
+            catch (java.lang.reflect.InvocationTargetException e) {}
+        }
 
         public boolean isVisible()                  { return getVisibility() == VISIBLE; }
         public void setVisible (boolean b)          { setVisibility (b ? VISIBLE : INVISIBLE); }

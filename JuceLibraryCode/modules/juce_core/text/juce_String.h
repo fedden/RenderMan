@@ -1,33 +1,34 @@
 /*
   ==============================================================================
 
-   This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission to use, copy, modify, and/or distribute this software for any purpose with
-   or without fee is hereby granted, provided that the above copyright notice and this
-   permission notice appear in all copies.
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
-   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
-   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   ------------------------------------------------------------------------------
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
-   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
-   using any other modules, be sure to check that you also comply with their license.
+   -----------------------------------------------------------------------------
 
-   For more details, visit www.juce.com
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef JUCE_STRING_H_INCLUDED
-#define JUCE_STRING_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -52,9 +53,8 @@ public:
     /** Creates a copy of another string. */
     String (const String& other) noexcept;
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     String (String&& other) noexcept;
-   #endif
 
     /** Creates a string from a zero-terminated ascii text string.
 
@@ -198,9 +198,8 @@ public:
     /** Replaces this string's contents with another string. */
     String& operator= (const String& other) noexcept;
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Moves the contents of another string to the receiver */
     String& operator= (String&& other) noexcept;
-   #endif
 
     /** Appends another string at the end of this one. */
     String& operator+= (const String& stringToAppend);
@@ -366,7 +365,7 @@ public:
         @returns     0 if the two strings are identical; negative if this string comes before
                      the other one alphabetically, or positive if it comes after it.
     */
-    int compareNatural (StringRef other) const noexcept;
+    int compareNatural (StringRef other, bool isCaseSensitive = false) const noexcept;
 
     /** Tests whether the string begins with another string.
         If the parameter is an empty string, this will always return true.
@@ -779,6 +778,17 @@ public:
     String replace (StringRef stringToReplace,
                     StringRef stringToInsertInstead,
                     bool ignoreCase = false) const;
+
+    /** Replaces the first occurrence of a substring with another string.
+
+        Returns a copy of this string, with the first occurrence of stringToReplace
+        swapped for stringToInsertInstead.
+
+        Note that this is a const method, and won't alter the string itself.
+    */
+    String replaceFirstOccurrenceOf (StringRef stringToReplace,
+                                     StringRef stringToInsertInstead,
+                                     bool ignoreCase = false) const;
 
     /** Returns a string with all occurrences of a character replaced with a different one. */
     String replaceCharacter (juce_wchar characterToReplace,
@@ -1202,8 +1212,6 @@ public:
     */
     size_t copyToUTF32 (CharPointer_UTF32::CharType* destBuffer, size_t maxBufferSizeBytes) const noexcept;
 
-    static String fromSingleByteData (const void* data, size_t numBytes);
-
     //==============================================================================
     /** Increases the string's internally allocated storage.
 
@@ -1391,6 +1399,3 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Str
 
 /** Writes a string to an OutputStream as UTF8. */
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef stringToWrite);
-
-
-#endif   // JUCE_STRING_H_INCLUDED

@@ -1,27 +1,29 @@
 /*
   ==============================================================================
 
-   This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission to use, copy, modify, and/or distribute this software for any purpose with
-   or without fee is hereby granted, provided that the above copyright notice and this
-   permission notice appear in all copies.
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
-   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
-   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   ------------------------------------------------------------------------------
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
-   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
-   using any other modules, be sure to check that you also comply with their license.
+   -----------------------------------------------------------------------------
 
-   For more details, visit www.juce.com
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
@@ -224,16 +226,17 @@ private:
     {
         // Let me know if any of these assertions fail on your system!
        #if JUCE_NATIVE_WCHAR_IS_UTF8
-        static_jassert (sizeof (wchar_t) == 1);
+        static_assert (sizeof (wchar_t) == 1, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #elif JUCE_NATIVE_WCHAR_IS_UTF16
-        static_jassert (sizeof (wchar_t) == 2);
+        static_assert (sizeof (wchar_t) == 2, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #elif JUCE_NATIVE_WCHAR_IS_UTF32
-        static_jassert (sizeof (wchar_t) == 4);
+        static_assert (sizeof (wchar_t) == 4, "JUCE_NATIVE_WCHAR_IS_* macro has incorrect value");
        #else
         #error "native wchar_t size is unknown"
        #endif
 
-        static_jassert (sizeof (EmptyString) == sizeof (StringHolder));
+        static_assert (sizeof (EmptyString) == sizeof (StringHolder),
+                       "StringHolder is not large enough to hold an empty String");
     }
 };
 
@@ -274,7 +277,6 @@ String& String::operator= (const String& other) noexcept
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 String::String (String&& other) noexcept   : text (other.text)
 {
     other.text = &(emptyString.text);
@@ -285,7 +287,6 @@ String& String::operator= (String&& other) noexcept
     std::swap (text, other.text);
     return *this;
 }
-#endif
 
 inline String::PreallocationBytes::PreallocationBytes (const size_t num) noexcept : numBytes (num) {}
 
@@ -672,7 +673,7 @@ static int stringCompareLeft (String::CharPointerType s1, String::CharPointerTyp
     }
 }
 
-static int naturalStringCompare (String::CharPointerType s1, String::CharPointerType s2) noexcept
+static int naturalStringCompare (String::CharPointerType s1, String::CharPointerType s2, bool isCaseSensitive) noexcept
 {
     bool firstLoop = true;
 
@@ -701,7 +702,7 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
         juce_wchar c1 = s1.getAndAdvance();
         juce_wchar c2 = s2.getAndAdvance();
 
-        if (c1 != c2)
+        if (c1 != c2 && ! isCaseSensitive)
         {
             c1 = CharacterFunctions::toUpperCase (c1);
             c2 = CharacterFunctions::toUpperCase (c2);
@@ -727,9 +728,9 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
     }
 }
 
-int String::compareNatural (StringRef other) const noexcept
+int String::compareNatural (StringRef other, bool isCaseSensitive) const noexcept
 {
-    return naturalStringCompare (getCharPointer(), other.text);
+    return naturalStringCompare (getCharPointer(), other.text, isCaseSensitive);
 }
 
 //==============================================================================
@@ -1324,6 +1325,18 @@ String String::replace (StringRef stringToReplace, StringRef stringToInsert, con
     return result;
 }
 
+String String::replaceFirstOccurrenceOf (StringRef stringToReplace, StringRef stringToInsert, const bool ignoreCase) const
+{
+    const int stringToReplaceLen = stringToReplace.length();
+    const int index = ignoreCase ? indexOfIgnoreCase (stringToReplace)
+                                 : indexOf (stringToReplace);
+
+    if (index >= 0)
+        return replaceSection (index, stringToReplaceLen, stringToInsert);
+
+    return *this;
+}
+
 class StringCreationHelper
 {
 public:
@@ -1869,7 +1882,9 @@ String String::formatted (const String pf, ... )
         const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
        #elif JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
-        const int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
+        int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
+        if (num >= static_cast<int> (bufferSize))
+            num = -1;
        #else
         HeapBlock<wchar_t> temp (bufferSize);
         const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
@@ -1911,7 +1926,7 @@ int String::getTrailingIntValue() const noexcept
             break;
         }
 
-        n += mult * (*t - '0');
+        n += static_cast<juce_wchar> (mult) * (*t - '0');
         mult *= 10;
     }
 

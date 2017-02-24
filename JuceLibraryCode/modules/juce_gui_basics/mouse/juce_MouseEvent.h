@@ -22,8 +22,7 @@
   ==============================================================================
 */
 
-#ifndef JUCE_MOUSEEVENT_H_INCLUDED
-#define JUCE_MOUSEEVENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -182,21 +181,21 @@ public:
     */
     int getDistanceFromDragStart() const noexcept;
 
-    /** Returns the difference between the mouse's current x postion and where it was
+    /** Returns the difference between the mouse's current x position and where it was
         when the button was last pressed.
 
         @see getDistanceFromDragStart
     */
     int getDistanceFromDragStartX() const noexcept;
 
-    /** Returns the difference between the mouse's current y postion and where it was
+    /** Returns the difference between the mouse's current y position and where it was
         when the button was last pressed.
 
         @see getDistanceFromDragStart
     */
     int getDistanceFromDragStartY() const noexcept;
 
-    /** Returns the difference between the mouse's current postion and where it was
+    /** Returns the difference between the mouse's current position and where it was
         when the button was last pressed.
 
         @see getDistanceFromDragStart
@@ -375,6 +374,3 @@ struct MouseWheelDetails
         the wheel being released. */
     bool isInertial;
 };
-
-
-#endif   // JUCE_MOUSEEVENT_H_INCLUDED

@@ -1,33 +1,34 @@
 /*
   ==============================================================================
 
-   This file is part of the juce_core module of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2016 - ROLI Ltd.
 
-   Permission to use, copy, modify, and/or distribute this software for any purpose with
-   or without fee is hereby granted, provided that the above copyright notice and this
-   permission notice appear in all copies.
+   Permission is granted to use this software under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license/
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN
-   NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
-   DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER
-   IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
 
-   ------------------------------------------------------------------------------
+   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
+   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
+   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+   OF THIS SOFTWARE.
 
-   NOTE! This permissive ISC license applies ONLY to files within the juce_core module!
-   All other JUCE modules are covered by a dual GPL/commercial license, so if you are
-   using any other modules, be sure to check that you also comply with their license.
+   -----------------------------------------------------------------------------
 
-   For more details, visit www.juce.com
+   To release a closed-source product which uses other parts of JUCE not
+   licensed under the ISC terms, commercial licenses are available: visit
+   www.juce.com for more information.
 
   ==============================================================================
 */
 
-#ifndef JUCE_ANDROID_JNIHELPERS_H_INCLUDED
-#define JUCE_ANDROID_JNIHELPERS_H_INCLUDED
+#pragma once
 
 #if ! (defined (JUCE_ANDROID_ACTIVITY_CLASSNAME) && defined (JUCE_ANDROID_ACTIVITY_CLASSPATH))
  #error "The JUCE_ANDROID_ACTIVITY_CLASSNAME and JUCE_ANDROID_ACTIVITY_CLASSPATH macros must be set!"
@@ -148,7 +149,7 @@ private:
 //==============================================================================
 namespace
 {
-    String juceString (JNIEnv* env, jstring s)
+    inline String juceString (JNIEnv* env, jstring s)
     {
         const char* const utf8 = env->GetStringUTFChars (s, nullptr);
         CharPointer_UTF8 utf8CP (utf8);
@@ -157,17 +158,17 @@ namespace
         return result;
     }
 
-    String juceString (jstring s)
+    inline String juceString (jstring s)
     {
         return juceString (getEnv(), s);
     }
 
-    LocalRef<jstring> javaString (const String& s)
+    inline LocalRef<jstring> javaString (const String& s)
     {
         return LocalRef<jstring> (getEnv()->NewStringUTF (s.toUTF8()));
     }
 
-    LocalRef<jstring> javaStringFromChar (const juce_wchar c)
+    inline LocalRef<jstring> javaStringFromChar (const juce_wchar c)
     {
         char utf8[8] = { 0 };
         CharPointer_UTF8 (utf8).write (c);
@@ -222,6 +223,7 @@ private:
     \
         void initialiseFields (JNIEnv* env) \
         { \
+            ignoreUnused (env); \
             JNI_CLASS_MEMBERS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD, CREATE_JNI_STATICFIELD); \
         } \
     \
@@ -349,5 +351,3 @@ DECLARE_JNI_CLASS (JuceThread, "java/lang/Thread");
 
 DECLARE_JNI_CLASS (RectClass, "android/graphics/Rect");
 #undef JNI_CLASS_MEMBERS
-
-#endif   // JUCE_ANDROID_JNIHELPERS_H_INCLUDED

@@ -108,6 +108,7 @@ build/intermediate/Debug/juce_gui_basics_8a6da59c.o: \
  ../../JuceLibraryCode/modules/juce_core/network/juce_NamedPipe.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_Socket.h \
  ../../JuceLibraryCode/modules/juce_core/network/juce_URL.h \
+ ../../JuceLibraryCode/modules/juce_core/network/juce_WebInputStream.h \
  ../../JuceLibraryCode/modules/juce_core/time/juce_PerformanceCounter.h \
  ../../JuceLibraryCode/modules/juce_core/unit_tests/juce_UnitTest.h \
  ../../JuceLibraryCode/modules/juce_core/xml/juce_XmlDocument.h \
@@ -137,7 +138,7 @@ build/intermediate/Debug/juce_gui_basics_8a6da59c.o: \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnection.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_InterprocessConnectionServer.h \
  ../../JuceLibraryCode/modules/juce_events/interprocess/juce_ConnectedChildProcess.h \
- ../../JuceLibraryCode/modules/juce_events/native/juce_ScopedXLock.h \
+ ../../JuceLibraryCode/modules/juce_events/native/juce_linux_EventLoop.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_AffineTransform.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_Point.h \
  ../../JuceLibraryCode/modules/juce_graphics/geometry/juce_Line.h \
@@ -308,6 +309,7 @@ build/intermediate/Debug/juce_gui_basics_8a6da59c.o: \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V2.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V1.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.h \
+ ../../JuceLibraryCode/modules/juce_gui_basics/native/juce_linux_X11.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_FlexItem.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_FlexBox.h \
  ../../JuceLibraryCode/modules/juce_gui_basics/components/juce_Component.cpp \
@@ -421,6 +423,7 @@ build/intermediate/Debug/juce_gui_basics_8a6da59c.o: \
  ../../JuceLibraryCode/modules/juce_gui_basics/misc/juce_BubbleComponent.cpp \
  ../../JuceLibraryCode/modules/juce_gui_basics/misc/juce_DropShadower.cpp \
  ../../JuceLibraryCode/modules/juce_gui_basics/layout/juce_FlexBox.cpp \
- ../../JuceLibraryCode/modules/juce_gui_basics/native/juce_linux_Clipboard.cpp \
- ../../JuceLibraryCode/modules/juce_gui_basics/native/juce_linux_Windowing.cpp \
+ ../../JuceLibraryCode/modules/juce_gui_basics/native/juce_linux_X11.cpp \
+ ../../JuceLibraryCode/modules/juce_gui_basics/native/juce_linux_X11_Clipboard.cpp \
+ ../../JuceLibraryCode/modules/juce_gui_basics/native/juce_linux_X11_Windowing.cpp \
  ../../JuceLibraryCode/modules/juce_gui_basics/native/juce_linux_FileChooser.cpp
