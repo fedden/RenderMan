@@ -17,12 +17,16 @@ A usage example of this library can be found [here](http://doc.gold.ac.uk/~lfedd
 
 This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VST and learnt close parameters here. Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line :)
 
-![](https://github.com/fedden/RenderMan/raw/master/Documentation/load_plugin.gif)
+### Loading Plugins
+![](https://github.com/fedden/RenderMan/raw/master/Documentation/loading_plugin.gif)
 
+### Getting Parameter Descriptions
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/plugin_description.gif)
 
+### Getting a Randomised Patch For a Synthesiser
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/print_random_patch.gif)
 
+### Plotting Audio Frames
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/plotting_audio_frames.gif)
 
 ## Building / Installation
