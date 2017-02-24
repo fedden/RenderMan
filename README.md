@@ -13,20 +13,28 @@
 
 Renderman is a command line VST host written in C++ with Python bindings using [JUCE](https://github.com/julianstorer/JUCE) and [Maximilian](https://github.com/micknoise/Maximilian) libraries for the backend. It is designed with ease of use in mind to extract audio and features from VST plugins. It has a fast growing list of features, including setting, getting parameters from synthesiers, setting whole patches, getting random patches, obtaining MFCCS, FFT, audio data and much more.
 
-A usage example of this library can be found [here](http://doc.gold.ac.uk/~lfedd001/renderman.html).
+A usage example in the form of an IPython notebook can be found [here](http://doc.gold.ac.uk/~lfedd001/renderman.html).
 
-This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VST and learnt close parameters here. Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line :)
+Here are some quick gifs demonstrating a miniscule amount of the availble features, go to the bottom of the read me to see the full API:
 
 ### Loading Plugins
+
+Here we load a plugin. On Linux it's an .so file, for MacOS it will be a .vst or .au.
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/loading_plugin.gif)
 
 ### Getting Parameter Descriptions
+
+We can obtain the available parameters that are used and that can be modified by doing the following.
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/plugin_description.gif)
 
 ### Getting a Randomised Patch For a Synthesiser
+
+We can easily get a randomised for a given synth by using the PatchGenerator class.
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/print_random_patch.gif)
 
-### Plotting Audio Frames
+### Plotting Rendered Audio Frames
+
+We can plot the output audio frames easily by using matplotlib.
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/plotting_audio_frames.gif)
 
 ## Building / Installation
@@ -188,3 +196,6 @@ We can get a completely random patch sampled from PRNG in the same way above.
 ```      
 list_of_tuples(int, float) get_random_patch()
 ```
+
+## Context and Contact
+This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VST and learnt close parameters [here](http://doc.gold.ac.uk/~lfedd001/tf_fm_synth_learn.html). Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line on here or leonfedden<at>gmail.com :)
