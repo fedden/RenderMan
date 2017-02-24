@@ -104,10 +104,6 @@ import librenderman as rm
 ```
 If this doesn't spit out errors, congratulations! Enjoy RenderMan. :)
 
-These instructions will change relatively soon as soon as I work out a more sensible building process, and the aim will be to have a pip package sorted fairly soon.
-
-_Warning: If you load the jucer file into Projucer (see JUCE) and save any changes, the makefile will be overriten as it automatically generates a makefile. This wont work for our purposes, so replace it with the 'Builds/saved_makefile'._
-
 ## API
 
 A rough description of the current api is as follows, it will be growing fairly soon with new features to extract:
