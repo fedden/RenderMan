@@ -17,9 +17,40 @@ A usage example of this library can be found [here](http://doc.gold.ac.uk/~lfedd
 
 This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VST and learnt close parameters here. Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line :)
 
-### Building / Installation
+## Building / Installation
 
-Currently this Python libary is only available for Linux machines. I need your help getting this working on Windows and Mac too - testing and patches are really appreciated! The code should compile on all operating systems, however I have only written a makefile that I know works on Linux. It is a priotity for me to have this project easy to compile on all platforms.
+First, obtain Steinberg's VST SDK. [Obtain it from here](https://www.steinberg.net/en/company/developers.html), last time I checked it was on 3.6.6.
+
+We need to ensure a folder titled 'SDKs' exists at the home directory.
+```
+mkdir ~/SDKs
+```
+
+Ensure the VST3 SDK is moved to the folder "~/SDKs/" so that JUCE can find the VST SDK headers.
+```
+mv ~/Downloads/VST3\ SDK/ ~/SDKs/
+```
+
+### MacOS
+
+If you haven't already, [get brew](https://brew.sh/). The last time I checked the command was this:
+```
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+```
+
+Then get the boost headers.
+```
+brew install boost-python
+```
+
+You can also install boost manually if for some reason you don't want to use brew, [see here.](http://www.boost.org/doc/libs/1_50_0/doc/html/quickbook/install.html)
+
+Now just open the Xcode project in the Builds directory and build it! There is a bug in the JUCE projucer app which means the generated shared object will be suffixed with a dylib. This means python wont be able to import the module. Until this bug is fixed, change directory into the Builds/MacOSX/build/<Debug/Release> (depending on your Xcode scheme,) and run:
+```
+mv librenderman.so.dylib librenderman.so
+```
+
+### Linux
 
 Firstly, you will need the boost library (specifically the python headers) for this code to compile.
 
@@ -39,7 +70,6 @@ sudo yum install boost-devel
 ```
 
 If your distribution's package manager doesn't have boost, [you can get the headers from here.](http://www.boost.org/doc/libs/1_47_0/more/getting_started/unix-variants.html)
-The next thing you will need to obtain is the VST SDK. [Obtain it from here](https://www.steinberg.net/en/company/developers.html), last time I checked it was on 3.6.6, and ensure its install to the folder "~/SDKs/". The final path into the vst folder should look like "~/SDKs/VST SDK/". It must be installed correctly so JUCE can be correctly find the sdk.
 
 Juce itself has a list of dependancies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out! Depending on your distribution and setup you may already have some / all of the following libraries. If you are on Ubuntu, the following commands will install your dependancies. Find the respective packages for other distros using google please!
 
@@ -62,7 +92,9 @@ Well done! You've made it this far! Should you still have problems, a good place
 
 So to now build the library for linux, change directory to Builds/LinuxMakefile/ and run simply run make.
 
-Change directory into the build folder and run:
+## Does It Work?
+
+Change directory to where the .so file is and run:
 ```
 python
 ```
@@ -76,10 +108,10 @@ These instructions will change relatively soon as soon as I work out a more sens
 
 _Warning: If you load the jucer file into Projucer (see JUCE) and save any changes, the makefile will be overriten as it automatically generates a makefile. This wont work for our purposes, so replace it with the 'Builds/saved_makefile'._
 
-### API
+## API
 
 A rough description of the current api is as follows, it will be growing fairly soon with new features to extract:
-##### RenderEngine
+##### class RenderEngine
 The constructor takes three arguments, the [sample rate](http://wiki.audacityteam.org/wiki/Sample_Rates), the buffer size and fft size. Good defualt values if you don't really care that much are 44100, 512, 512 repsectively.
 ```
 __init__(int sample_rate,
@@ -130,7 +162,7 @@ Get a list of floats which is the audio from the rendering session.
 ```
 list get_audio_frames()
 ```  
-##### PatchGenerator
+##### class PatchGenerator
 This class is used to generate patches for a given engine.
 
 The constructor takes an argument of a RenderEngine that has succesfully loaded a plugin.
