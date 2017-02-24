@@ -17,6 +17,14 @@ A usage example of this library can be found [here](http://doc.gold.ac.uk/~lfedd
 
 This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VST and learnt close parameters here. Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line :)
 
+![](https://github.com/fedden/RenderMan/tree/master/Documentation/load_plugin.gif)
+
+![](https://github.com/fedden/RenderMan/tree/master/Documentation/plugin_description.gif)
+
+![](https://github.com/fedden/RenderMan/tree/master/Documentation/print_random_patch.gif)
+
+![](https://github.com/fedden/RenderMan/tree/master/Documentation/plotting_audio_frames.gif)
+
 ## Building / Installation
 
 First, obtain Steinberg's VST SDK. [Obtain it from here](https://www.steinberg.net/en/company/developers.html), last time I checked it was on 3.6.6.
@@ -88,9 +96,13 @@ sudo apt-get -y install libxcomposite-dev
 sudo apt-get -y install libcurl4-gnutls-dev
 ```
 
-Well done! You've made it this far! Should you still have problems, a good place to start is the JUCE forums, particularly [here](https://forum.juce.com/t/juce-4-2-1-setup-on-apt-based-linux-ubuntu-16-04-lts-mint-elementary-os-freya/17164) and [here](https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121). Feel free to drop me a note with an error and I'll happily scratch my head over it but you may get better results in the forums!
+Well done! You've made it this far! Should you still have problems, which is always a possibility with Linux, a good place to start is the JUCE forums, particularly [here](https://forum.juce.com/t/juce-4-2-1-setup-on-apt-based-linux-ubuntu-16-04-lts-mint-elementary-os-freya/17164) and [here](https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121). Feel free to drop me a note with an error and I'll happily scratch my head over it but you may get better results in the forums!
 
-So to now build the library for linux, change directory to Builds/LinuxMakefile/ and run simply run make.
+So to now build the library for Linux, change directory to Builds/LinuxMakefile/ and run simply run make.
+
+### Windows
+
+Windows isn't ready yet, but is in my to-do list. Patches, errors and notes are very welcome here!
 
 ## Does It Work?
 
@@ -106,7 +118,6 @@ If this doesn't spit out errors, congratulations! Enjoy RenderMan. :)
 
 ## API
 
-A rough description of the current api is as follows, it will be growing fairly soon with new features to extract:
 ##### class RenderEngine
 The constructor takes three arguments, the [sample rate](http://wiki.audacityteam.org/wiki/Sample_Rates), the buffer size and fft size. Good defualt values if you don't really care that much are 44100, 512, 512 repsectively.
 ```
