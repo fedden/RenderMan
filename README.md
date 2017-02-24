@@ -39,7 +39,7 @@ sudo yum install boost-devel
 ```
 
 If your distribution's package manager doesn't have boost, [you can get the headers from here.](http://www.boost.org/doc/libs/1_47_0/more/getting_started/unix-variants.html)
-The next thing you will need to obtain is the VST SDK. Obtain it from here, and ensure its install to the folder "~/SDKs/". The final path into the vst folder should look like "~/SDKs/VST SDK/". It must be installed correctly so JUCE can be correctly find the sdk.
+The next thing you will need to obtain is the VST SDK. [Obtain it from here](https://www.steinberg.net/en/company/developers.html), last time I checked it was on 3.6.6, and ensure its install to the folder "~/SDKs/". The final path into the vst folder should look like "~/SDKs/VST SDK/". It must be installed correctly so JUCE can be correctly find the sdk.
 
 Juce itself has a list of dependancies for Linux; it's a very big library - if you don't know it you should definitely take some time out to check it out! Depending on your distribution and setup you may already have some / all of the following libraries. If you are on Ubuntu, the following commands will install your dependancies. Find the respective packages for other distros using google please!
 
