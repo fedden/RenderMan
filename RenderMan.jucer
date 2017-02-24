@@ -33,10 +33,10 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="renderman"
                        osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"
-                       headerPath="/usr/include/python2.7&#10;/usr/local/include"/>
+                       headerPath="/usr/include/python2.7&#10;/usr/local/include&#10;/usr/local/lib"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="renderman"
                        osxCompatibility="10.9 SDK" osxArchitecture="64BitUniversal"
-                       headerPath="/usr/include/python2.7&#10;/usr/local/include"/>
+                       headerPath="/usr/include/python2.7&#10;/usr/local/include&#10;/usr/local/lib"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
