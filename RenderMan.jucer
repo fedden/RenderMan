@@ -31,10 +31,10 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" vst3Folder="" extraLinkerFlags="-shared -lpython2.7 -lboost_python"
                extraCompilerFlags="-fPIC">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="renderman"
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="librenderman.so"
                        osxCompatibility="10.9 SDK" osxArchitecture="Native" headerPath="/usr/include/python2.7&#10;/usr/local/include&#10;"
                        libraryPath="/usr/local/lib"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="renderman"
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="librenderman.so"
                        osxCompatibility="10.9 SDK" osxArchitecture="Native" headerPath="/usr/include/python2.7&#10;/usr/local/include&#10;"
                        libraryPath="/usr/local/lib"/>
       </CONFIGURATIONS>

@@ -50,7 +50,7 @@
 		113EF82CCCA4A8BF8A9552D0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_audio_processors.mm"; path = "../../JuceLibraryCode/juce_audio_processors.mm"; sourceTree = "SOURCE_ROOT"; };
 		120826105E7F7F01EB90E2DD = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_formats"; path = "../../JuceLibraryCode/modules/juce_audio_formats"; sourceTree = "SOURCE_ROOT"; };
 		142E024F69CD215490C2D076 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_events.mm"; path = "../../JuceLibraryCode/juce_events.mm"; sourceTree = "SOURCE_ROOT"; };
-		14D8BBB0AE299D04ACF0C062 = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = renderman.dylib; sourceTree = "BUILT_PRODUCTS_DIR"; };
+		14D8BBB0AE299D04ACF0C062 = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = librenderman.so.dylib; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		1B0D8682D71DE335787BA764 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_extra"; path = "../../JuceLibraryCode/modules/juce_gui_extra"; sourceTree = "SOURCE_ROOT"; };
 		1B24D4A69BF5E24D9E0DB1E5 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1D609F443B08D98D397EEC1C = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
@@ -253,7 +253,7 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				PRODUCT_NAME = "renderman";
+				PRODUCT_NAME = "librenderman.so";
 				WARNING_CFLAGS = -Wreorder;
 				ZERO_LINK = NO; }; name = Debug; };
 		C6312E08586814C54E763C43 = {isa = XCBuildConfiguration; buildSettings = {
@@ -268,7 +268,7 @@
 				GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES;
 				GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				PRODUCT_NAME = "renderman";
+				PRODUCT_NAME = "librenderman.so";
 				WARNING_CFLAGS = -Wreorder;
 				ZERO_LINK = NO; }; name = Release; };
 		BB8D3E8B9B0D97F552A3596F = {isa = PBXTargetDependency; target = E98E387BEE39DA3BB2453E26; };
