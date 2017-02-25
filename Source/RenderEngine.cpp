@@ -21,7 +21,7 @@ bool RenderEngine::loadPlugin (const std::string& path)
 
     for (int i = pluginFormatManager.getNumFormats(); --i >= 0;)
     {
-        pluginList.scanAndAddFile (String(path),
+        pluginList.scanAndAddFile (String (path),
                                    true,
                                    pluginDescriptions,
                                    *pluginFormatManager.getFormat(i));
@@ -43,14 +43,14 @@ bool RenderEngine::loadPlugin (const std::string& path)
     {
         // Success so set up plugin, then set up features and get all available
         // parameters from this given plugin.
-        plugin->prepareToPlay(sampleRate, bufferSize);
-        plugin->setNonRealtime(true);
+        plugin->prepareToPlay (sampleRate, bufferSize);
+        plugin->setNonRealtime (true);
 
-        mfcc.setup(512, 42, 13, 20, int(sampleRate / 2), sampleRate);
+        mfcc.setup (512, 42, 13, 20, int (sampleRate / 2), sampleRate);
 
         // Resize the pluginParameters patch type to fit this plugin and init
         // all the values to 0.0f!
-        fillAvailablePluginParameters(pluginParameters);
+        fillAvailablePluginParameters (pluginParameters);
 
         return true;
     }
@@ -70,7 +70,7 @@ void RenderEngine::renderPatch (const uint8  midiNote,
 {
     // Get the overriden patch and set the vst parameters with it.
     PluginPatch overridenPatch = getPatch();
-    for (const auto& parameter: overridenPatch)
+    for (const auto& parameter : overridenPatch)
         plugin->setParameter (parameter.first, parameter.second);
 
     // Get the note on midiBuffer.
@@ -96,47 +96,59 @@ void RenderEngine::renderPatch (const uint8  midiNote,
     processedMonoAudioPreview.clear();
     processedMonoAudioPreview.reserve (numberOfBuffers * bufferSize);
 
+    // Number of FFT, MFCC and RMS frames.
+    int numberOfFFT = int (std::ceil (renderLength * sampleRate / fftSize)) * 4;
+    rmsFrames.clear();
+    rmsFrames.reserve (numberOfFFT);
+    currentRmsFrame = 0.0;
+    mfccFeatures.clear();
+    mfccFeatures.reserve (numberOfFFT);
+
     plugin->prepareToPlay (sampleRate, bufferSize);
 
     for (int i = 0; i < numberOfBuffers; ++i)
     {
         // Trigger note off if in the correct audio buffer.
-        ifTimeSetNoteOff(noteLength,
-                         sampleRate,
-                         bufferSize,
-                         1,
-                         midiNote,
-                         midiVelocity,
-                         i,
-                         midiNoteBuffer);
+        ifTimeSetNoteOff (noteLength,
+                          sampleRate,
+                          bufferSize,
+                          1,
+                          midiNote,
+                          midiVelocity,
+                          i,
+                          midiNoteBuffer);
 
         // Turn Midi to audio via the vst.
-        plugin->processBlock(audioBuffer, midiNoteBuffer);
+        plugin->processBlock (audioBuffer, midiNoteBuffer);
 
         // Get audio features and fill the datastructure.
-        fillAudioFeatures(audioBuffer, fft);
+        fillAudioFeatures (audioBuffer, fft);
     }
 }
 
 //=============================================================================
-void RenderEngine::fillAudioFeatures(const AudioSampleBuffer& data,
-                                     maxiFFT&                 fft)
+void RenderEngine::fillAudioFeatures (const AudioSampleBuffer& data,
+                                      maxiFFT&                 fft)
 {
     // Keep it auto as it may or may not be double precision.
-    auto readptrs = data.getArrayOfReadPointers();
+    const auto readptrs = data.getArrayOfReadPointers();
     for (int i = 0; i < data.getNumSamples(); ++i)
     {
         // Mono the frame.
         int channel = 0;
         auto currentFrame = readptrs[channel][i];
-        while (++channel < data.getNumChannels())
-        {
+        const int numberChannels = data.getNumChannels();
+
+        while (++channel < numberChannels)
             currentFrame += readptrs[channel][i];
-        }
-        currentFrame /= data.getNumChannels();
+
+        currentFrame /= numberChannels;
 
         // Save the audio for playback and plotting!
         processedMonoAudioPreview.push_back (currentFrame);
+
+        // RMS.
+        currentRmsFrame += (currentFrame * currentFrame);
 
         // Extract features.
         if (fft.process (currentFrame))
@@ -147,12 +159,17 @@ void RenderEngine::fillAudioFeatures(const AudioSampleBuffer& data,
             mfcc.mfcc (fft.magnitudes, mfccs);
 
             std::array<double, 13> mfccsFrame;
-            std::memcpy (mfccsFrame.data(), mfccs, sizeof(double) * 13);
+            std::memcpy (mfccsFrame.data(), mfccs, sizeof (double) * 13);
 
             // Add the mfcc frames here.
             mfccFeatures.push_back (mfccsFrame);
-
             delete[] mfccs;
+
+            // Root Mean Square.
+            currentRmsFrame /= fftSize;
+            currentRmsFrame = sqrt (currentRmsFrame);
+            rmsFrames.push_back (currentRmsFrame);
+            currentRmsFrame = 0.0;
         }
     }
 }
@@ -285,7 +302,7 @@ bool RenderEngine::removeOverridenParameter (const int index)
 void RenderEngine::fillAvailablePluginParameters (PluginPatch& params)
 {
     params.clear();
-    params.reserve(plugin->getNumParameters());
+    params.reserve (plugin->getNumParameters());
 
     int usedParameterAmount = 0;
     for (int i = 0; i < plugin->getNumParameters(); ++i)
@@ -294,7 +311,7 @@ void RenderEngine::fillAvailablePluginParameters (PluginPatch& params)
         if (plugin->getParameterName(i) != "Param")
         {
             ++usedParameterAmount;
-            params.push_back(std::make_pair(i, 0.0f));
+            params.push_back (std::make_pair (i, 0.0f));
         }
     }
     params.shrink_to_fit();
@@ -303,24 +320,23 @@ void RenderEngine::fillAvailablePluginParameters (PluginPatch& params)
 //==============================================================================
 const String RenderEngine::getPluginParametersDescription()
 {
-    String parameterListString("");
+    String parameterListString ("");
 
     if (plugin != nullptr)
     {
         std::ostringstream ss;
 
-        for (auto& pair : pluginParameters)
+        for (const auto& pair : pluginParameters)
         {
-            ss << std::setw(3) << std::setfill(' ') << pair.first;
+            ss << std::setw (3) << std::setfill (' ') << pair.first;
 
-            const String name = plugin->getParameterName(pair.first);
-            const String index(ss.str());
+            const String name = plugin->getParameterName (pair.first);
+            const String index (ss.str());
 
             parameterListString = parameterListString +
-                                  "* Index: " + index +
-                                  "\n  Name:  " + name +
+                                  index + ": " + name +
                                   "\n";
-            ss.str("");
+            ss.str ("");
             ss.clear();
         }
     }
@@ -382,22 +398,48 @@ const size_t RenderEngine::getPluginParameterSize()
 }
 
 //==============================================================================
-const MFCCFeatures RenderEngine::getMFCCFeatures()
+const MFCCFeatures RenderEngine::getMFCCFrames()
 {
     return mfccFeatures;
 }
 
 //==============================================================================
-std::vector<double> RenderEngine::getAudioFrames()
+const MFCCFeatures RenderEngine::getNormalisedMFCCFrames(const std::array<double, 13>& mean,
+                                                         const std::array<double, 13>& variance)
+{
+    MFCCFeatures normalisedMFCCFrames;
+    normalisedMFCCFrames.resize (mfccFeatures.size());
+
+    for (size_t i = 0; i < normalisedMFCCFrames.size(); ++i)
+    {
+        for (size_t j = 0; j < 13; ++j)
+        {
+            normalisedMFCCFrames[i][j] = mfccFeatures[i][j] - mean[j];
+            normalisedMFCCFrames[i][j] /= variance[j];
+        }
+    }
+    return normalisedMFCCFrames;
+}
+
+//==============================================================================
+const std::vector<double> RenderEngine::getAudioFrames()
 {
     return processedMonoAudioPreview;
 }
 
 //==============================================================================
+const std::vector<double> RenderEngine::getRMSFrames()
+{
+    return rmsFrames;
+}
+
+//==============================================================================
 bool RenderEngine::writeToWav(const std::string& path)
 {
-    auto size = processedMonoAudioPreview.size();
-    if (size == 0) return false;
+    const auto size = processedMonoAudioPreview.size();
+    if (size == 0)
+        return false;
+
     maxiRecorder recorder;
     recorder.setup (path);
     recorder.startRecording();

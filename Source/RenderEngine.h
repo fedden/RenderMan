@@ -61,7 +61,12 @@ public:
                       const double noteLength,
                       const double renderLength);
 
-    const MFCCFeatures getMFCCFeatures();
+    const MFCCFeatures getMFCCFrames();
+
+    const MFCCFeatures getNormalisedMFCCFrames (const std::array<double, 13>& mean,
+                                                const std::array<double, 13>& variance);
+
+    const std::vector<double> getRMSFrames();
 
     const size_t getPluginParameterSize();
 
@@ -72,7 +77,7 @@ public:
 
     bool removeOverridenParameter (const int index);
 
-    std::vector<double> getAudioFrames();
+    const std::vector<double> getAudioFrames();
 
     bool writeToWav(const std::string& path);
 
@@ -80,14 +85,14 @@ private:
     void fillAudioFeatures (const AudioSampleBuffer& data,
                             maxiFFT&                 fft);
 
-    void ifTimeSetNoteOff(const double& noteLength,
-                          const double& sampleRate,
-                          const int&    bufferSize,
-                          const uint8&  midiChannel,
-                          const uint8&  midiPitch,
-                          const uint8&  midiVelocity,
-                          const int&    currentBufferIndex,
-                          MidiBuffer&   bufferToNoteOff);
+    void ifTimeSetNoteOff (const double& noteLength,
+                           const double& sampleRate,
+                           const int&    bufferSize,
+                           const uint8&  midiChannel,
+                           const uint8&  midiPitch,
+                           const uint8&  midiVelocity,
+                           const int&    currentBufferIndex,
+                           MidiBuffer&   bufferToNoteOff);
 
     void fillAvailablePluginParameters (PluginPatch& params);
 
@@ -100,6 +105,8 @@ private:
     PluginPatch          overridenParameters;
     MFCCFeatures         mfccFeatures;
     std::vector<double>  processedMonoAudioPreview;
+    std::vector<double>  rmsFrames;
+    double               currentRmsFrame;
 };
 
 

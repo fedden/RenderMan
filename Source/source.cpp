@@ -138,9 +138,9 @@ namespace wrap
                                       renderLength);
         }
 
-        boost::python::list wrapperGetMFCCFeatures()
+        boost::python::list wrapperGetMFCCFrames()
         {
-            return mfccFramesToListOfLists (RenderEngine::getMFCCFeatures());
+            return mfccFramesToListOfLists (RenderEngine::getMFCCFrames());
         }
 
         int wrapperGetPluginParameterSize()
@@ -156,6 +156,11 @@ namespace wrap
         boost::python::list wrapperGetAudioFrames()
         {
             return vectorToList (RenderEngine::getAudioFrames());
+        }
+
+        boost::python::list wrapperGetRMSFrames()
+        {
+            return vectorToList (RenderEngine::getRMSFrames());
         }
     };
 
@@ -190,12 +195,13 @@ BOOST_PYTHON_MODULE(librenderman)
     .def("set_patch", &RenderEngineWrapper::wrapperSetPatch)
     .def("get_patch", &RenderEngineWrapper::wrapperGetPatch)
     .def("render_patch", &RenderEngineWrapper::wrapperRenderPatch)
-    .def("get_mfcc_features", &RenderEngineWrapper::wrapperGetMFCCFeatures)
+    .def("get_mfcc_frames", &RenderEngineWrapper::wrapperGetMFCCFrames)
     .def("get_plugin_parameter_size", &RenderEngineWrapper::wrapperGetPluginParameterSize)
     .def("get_plugin_parameters_description", &RenderEngineWrapper::wrapperGetPluginParametersDescription)
     .def("override_plugin_parameter", &RenderEngineWrapper::overridePluginParameter)
     .def("remove_overriden_plugin_parameter", &RenderEngineWrapper::removeOverridenParameter)
     .def("get_audio_frames", &RenderEngineWrapper::wrapperGetAudioFrames)
+    .def("get_rms_frames", &RenderEngineWrapper::wrapperGetRMSFrames)
     .def("write_to_wav", &RenderEngineWrapper::writeToWav);
 
     class_<PatchGeneratorWrapper>("PatchGenerator", init<RenderEngineWrapper&>())

@@ -110,7 +110,11 @@ sudo apt-get -y install libcurl4-gnutls-dev
 
 Well done! You've made it this far! Should you still have problems, which is always a possibility with Linux, a good place to start is the JUCE forums, particularly [here](https://forum.juce.com/t/juce-4-2-1-setup-on-apt-based-linux-ubuntu-16-04-lts-mint-elementary-os-freya/17164) and [here](https://forum.juce.com/t/list-of-juce-dependencies-under-linux/15121). Feel free to drop me a note with an error and I'll happily scratch my head over it but you may get better results in the forums!
 
-So to now build the library for Linux, change directory to Builds/LinuxMakefile/ and run simply run make.
+So to now build the library for Linux, change to the right directory and run make:
+```
+cd Builds/LinuxMakefile/
+make
+```
 
 ### Windows
 
@@ -127,6 +131,8 @@ Once in interactive mode, run:
 import librenderman as rm
 ```
 If this doesn't spit out errors, congratulations! Enjoy RenderMan. :)
+
+_Note you'll need to have the .so binary in the same directory as the Python project or where you call the interative Python shell from. To use it system wide it will need to be added to the PYTHONPATH environment variable. Soon I'll get distutils sorted so there is an easier installation method._
 
 ## API
 
@@ -156,9 +162,9 @@ void render_patch(int   midi_note_pitch,
                   float note_length_seconds,
                   float render_length_seconds)
 ```
-Get MFCC features as a list of lists. The first length will be dictated by fft size, smaller means a greater set of mfccs, and the second length with be 13, which is the amount of coefficients.
+Get MFCC features as a list of lists. The first length will be dictated by fft size divided by four, and the second length with be 13, which is the amount of coefficients.
 ```
-list_of_lists get_mfcc_features()
+list_of_lists get_mfcc_frames()
 ```   
 Get the int amount of parameters for the loaded plugin.
 ```
@@ -170,7 +176,7 @@ string get_plugin_parameters_description()
 ```
 Override a parameter to always be the supplied value. The float is normalised (0 - 1).
 ```
-override_plugin_parameter(int index,
+override_plugin_parameter(int   index,
                           float value)
 ```  
 Remove an overriden plugin parameter.
@@ -184,6 +190,10 @@ list get_audio_frames()
 Write the current patch to a wav file at the specified relative or absolute path. This will overwrite existing files and is only a preview; it is mono and currently not quite loud enough.
 ```
 void write_to_wav(string path)
+```
+Get a list of root mean squared frames derived from the audio samples. Each frame is a root mean squared of an amount of samples equal to the fft size divided by four.
+```
+list_of_floats get_rms_frames()
 ```
 
 ##### class PatchGenerator

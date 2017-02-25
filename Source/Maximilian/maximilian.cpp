@@ -2388,13 +2388,6 @@ void maxiRecorder::saveToWav()
 
     pcmDataInt.resize(pcmData.size());
 
-    for (int i = 0; i < pcmData.size(); ++i)
-    {
-        std::cout << pcmData[i];
-        pcmDataInt[i] = (short) (pcmData[i] * 3276.7);
-        std::cout << "    " << pcmDataInt[i] << std::endl;
-    }
-
     int sampleRate = maxiSettings::sampleRate;
     short channels = maxiSettings::channels;
     int   buffSize = pcmDataInt.size() * 2;
