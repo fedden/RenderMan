@@ -15,24 +15,24 @@ Renderman is a command line VST host written in C++ with Python bindings using [
 
 A usage example in the form of an IPython notebook can be found [here](http://doc.gold.ac.uk/~lfedd001/renderman.html).
 
-Here are some quick gifs demonstrating a miniscule amount of the availble features, go to the bottom of the read me to see the full API:
+Here are some quick gifs demonstrating a miniscule amount of the availble features, go towards the bottom of the README to see the full API:
 
-### Loading Plugins
+#### Loading Plugins
 
 Here we load a plugin. On Linux it's an .so file, for MacOS it will be a .vst or .au.
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/loading_plugin.gif)
 
-### Getting Parameter Descriptions
+#### Getting Parameter Descriptions
 
 We can obtain the available parameters that are used and that can be modified by doing the following.
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/plugin_description.gif)
 
-### Getting a Randomised Patch For a Synthesiser
+#### Getting a Randomised Patch For a Synthesiser
 
 We can easily get a randomised for a given synth by using the PatchGenerator class.
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/print_random_patch.gif)
 
-### Plotting Rendered Audio Frames
+#### Plotting Rendered Audio Frames
 
 We can plot the output audio frames easily by using matplotlib.
 ![](https://github.com/fedden/RenderMan/raw/master/Documentation/plotting_audio_frames.gif)
@@ -53,12 +53,12 @@ mv ~/Downloads/VST3\ SDK/ ~/SDKs/
 
 ### MacOS
 
-If you haven't already, [get brew](https://brew.sh/). The last time I checked the command was this:
+If you haven't already, [get brew](https://brew.sh/). The last time I checked the command to install was simply this:
 ```
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-Then get the boost headers.
+Next, get the boost headers.
 ```
 brew install boost-python
 ```
@@ -181,6 +181,11 @@ Get a list of floats which is the audio from the rendering session.
 ```
 list get_audio_frames()
 ```  
+Write the current patch to a wav file at the specified relative or absolute path. This will overwrite existing files and is only a preview; it is mono and currently not quite loud enough.
+```
+void write_to_wav(string path)
+```
+
 ##### class PatchGenerator
 This class is used to generate patches for a given engine.
 

@@ -71,7 +71,7 @@ void RenderEngine::renderPatch (const uint8  midiNote,
     // Get the overriden patch and set the vst parameters with it.
     PluginPatch overridenPatch = getPatch();
     for (const auto& parameter: overridenPatch)
-        plugin->setParameter(parameter.first, parameter.second);
+        plugin->setParameter (parameter.first, parameter.second);
 
     // Get the note on midiBuffer.
     MidiMessage onMessage = MidiMessage::noteOn (1,
@@ -96,7 +96,7 @@ void RenderEngine::renderPatch (const uint8  midiNote,
     processedMonoAudioPreview.clear();
     processedMonoAudioPreview.reserve (numberOfBuffers * bufferSize);
 
-    plugin->prepareToPlay(sampleRate, bufferSize);
+    plugin->prepareToPlay (sampleRate, bufferSize);
 
     for (int i = 0; i < numberOfBuffers; ++i)
     {
@@ -391,4 +391,19 @@ const MFCCFeatures RenderEngine::getMFCCFeatures()
 std::vector<double> RenderEngine::getAudioFrames()
 {
     return processedMonoAudioPreview;
+}
+
+//==============================================================================
+bool RenderEngine::writeToWav(const std::string& path)
+{
+    auto size = processedMonoAudioPreview.size();
+    if (size == 0) return false;
+    maxiRecorder recorder;
+    recorder.setup (path);
+    recorder.startRecording();
+    const double* data = processedMonoAudioPreview.data();
+    recorder.passData (data, size);
+    recorder.stopRecording();
+    recorder.saveToWav();
+    return true;
 }

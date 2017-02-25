@@ -36,7 +36,9 @@ public:
         bufferSize(bs),
         fftSize(ffts),
         plugin(nullptr)
-    { }
+    {
+        maxiSettings::setup (sampleRate, 1, bufferSize);
+    }
 
     virtual ~RenderEngine()
     {
@@ -71,6 +73,8 @@ public:
     bool removeOverridenParameter (const int index);
 
     std::vector<double> getAudioFrames();
+
+    bool writeToWav(const std::string& path);
 
 private:
     void fillAudioFeatures (const AudioSampleBuffer& data,
