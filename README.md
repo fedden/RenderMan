@@ -217,6 +217,9 @@ This library is a work in progress for my final year project where I am using Ne
 
 Finally, doing something cool with this library? Let me know what you are up to! And if this code was useful for you then please kindly drop me a GitHub star so more developers will trust and use this code.
 
+If you use this code for academic works, feel free to reference this code through the DOI here:
+[![DOI](https://zenodo.org/badge/82790125.svg)](https://zenodo.org/badge/latestdoi/82790125)
+
 Thanks for reading this far, you rock!
 
 ![](https://media.giphy.com/media/lr2bkSkxMWFCo/giphy.gif)
