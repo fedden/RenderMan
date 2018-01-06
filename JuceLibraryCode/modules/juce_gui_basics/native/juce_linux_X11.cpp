@@ -4,23 +4,28 @@
    This file is part of the JUCE library.
    Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 typedef void (*WindowMessageReceiveCallback) (XEvent&);
 WindowMessageReceiveCallback dispatchWindowMessage = nullptr;
@@ -29,14 +34,13 @@ typedef void (*SelectionRequestCallback) (XSelectionRequestEvent&);
 SelectionRequestCallback handleSelectionRequest = nullptr;
 
 ::Window juce_messageWindowHandle;
-
 XContext windowHandleXContext;
 
 //==============================================================================
 namespace X11ErrorHandling
 {
-    static XErrorHandler oldErrorHandler = (XErrorHandler) 0;
-    static XIOErrorHandler oldIOErrorHandler = (XIOErrorHandler) 0;
+    static XErrorHandler   oldErrorHandler = {};
+    static XIOErrorHandler oldIOErrorHandler = {};
 
     //==============================================================================
     // Usually happens when client-server connection is broken
@@ -47,8 +51,6 @@ namespace X11ErrorHandling
         if (JUCEApplicationBase::isStandaloneApp())
             MessageManager::getInstance()->stopDispatchLoop();
 
-        // set this somewhere
-        // errorOccurred = true;
         return 0;
     }
 
@@ -78,16 +80,15 @@ namespace X11ErrorHandling
     void removeXErrorHandlers()
     {
         XSetIOErrorHandler (oldIOErrorHandler);
-        oldIOErrorHandler = 0;
+        oldIOErrorHandler = {};
 
         XSetErrorHandler (oldErrorHandler);
-        oldErrorHandler = 0;
+        oldErrorHandler = {};
     }
 }
 
 //==============================================================================
 XWindowSystem::XWindowSystem() noexcept
-    : display (nullptr)
 {
     if (JUCEApplicationBase::isStandaloneApp())
     {
@@ -119,21 +120,31 @@ XWindowSystem::~XWindowSystem() noexcept
     clearSingletonInstance();
 }
 
-
 ::Display* XWindowSystem::displayRef() noexcept
 {
-    if (++displayCount - 1 == 0)
+    if (++displayCount == 1)
     {
+        jassert (display == nullptr);
+
         String displayName (getenv ("DISPLAY"));
+
         if (displayName.isEmpty())
             displayName = ":0.0";
 
-        display = XOpenDisplay (displayName.toUTF8());
+        // it seems that on some systems XOpenDisplay will occasionally
+        // fail the first time, but succeed on a second attempt..
+        for (int retries = 2; --retries >= 0;)
+        {
+            display = XOpenDisplay (displayName.toUTF8());
+
+            if (display != nullptr)
+                break;
+        }
 
         initialiseXDisplay();
     }
 
-    return this->display;
+    return display;
 }
 
 ::Display* XWindowSystem::displayUnref() noexcept
@@ -178,9 +189,10 @@ void XWindowSystem::initialiseXDisplay() noexcept
 
     // Setup input event handler
     int fd = XConnectionNumber (display);
-    LinuxEventLoop::setWindowSystemFd
-        (fd,
-         [this](int /*fd*/) {
+
+    LinuxEventLoop::setWindowSystemFd (fd,
+         [this](int /*fd*/)
+         {
             do
             {
                 XEvent evt;
@@ -195,11 +207,15 @@ void XWindowSystem::initialiseXDisplay() noexcept
                 }
 
                 if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle
-                    && handleSelectionRequest != nullptr)
+                     && handleSelectionRequest != nullptr)
+                {
                     handleSelectionRequest (evt.xselectionrequest);
+                }
                 else if (evt.xany.window != juce_messageWindowHandle
-                         && dispatchWindowMessage != nullptr)
+                          && dispatchWindowMessage != nullptr)
+                {
                     dispatchWindowMessage (evt);
+                }
 
             } while (display != nullptr);
 
@@ -210,47 +226,39 @@ void XWindowSystem::initialiseXDisplay() noexcept
 void XWindowSystem::destroyXDisplay() noexcept
 {
     ScopedXLock xlock (display);
-
     XDestroyWindow (display, juce_messageWindowHandle);
-
     juce_messageWindowHandle = 0;
-
     XSync (display, True);
-
     LinuxEventLoop::removeWindowSystemFd();
 }
 
 juce_ImplementSingleton (XWindowSystem)
 
 //==============================================================================
-ScopedXDisplay::ScopedXDisplay()
+ScopedXDisplay::ScopedXDisplay() : display (XWindowSystem::getInstance()->displayRef())
 {
-    display = XWindowSystem::getInstance()->displayRef();
 }
+
 ScopedXDisplay::~ScopedXDisplay()
 {
     XWindowSystem::getInstance()->displayUnref();
 }
 
-::Display* ScopedXDisplay::get()
-{
-    return display;
-}
-
 //==============================================================================
-ScopedXLock::ScopedXLock(::Display* _display)
-    : display (_display)
+ScopedXLock::ScopedXLock (::Display* d) : display (d)
 {
-    if (display != nullptr) XLockDisplay (display);
+    if (display != nullptr)
+        XLockDisplay (display);
 }
 
 ScopedXLock::~ScopedXLock()
 {
-    if (display != nullptr) XUnlockDisplay (display);
+    if (display != nullptr)
+        XUnlockDisplay (display);
 }
 
 //==============================================================================
-Atoms::Atoms(::Display* display)
+Atoms::Atoms (::Display* display)
 {
     protocols                    = getIfExists (display, "WM_PROTOCOLS");
     protocolList [TAKE_FOCUS]    = getIfExists (display, "WM_TAKE_FOCUS");
@@ -279,6 +287,9 @@ Atoms::Atoms(::Display* display)
     XdndActionPrivate            = getCreating (display, "XdndActionPrivate");
     XdndActionDescription        = getCreating (display, "XdndActionDescription");
 
+    XembedMsgType                = getCreating (display, "_XEMBED");
+    XembedInfo                   = getCreating (display, "_XEMBED_INFO");
+
     allowedMimeTypes[0]          = getCreating (display, "UTF8_STRING");
     allowedMimeTypes[1]          = getCreating (display, "text/plain;charset=utf-8");
     allowedMimeTypes[2]          = getCreating (display, "text/plain");
@@ -291,15 +302,8 @@ Atoms::Atoms(::Display* display)
     allowedActions[4]            = XdndActionPrivate;
 }
 
-Atom Atoms::getIfExists (::Display* display, const char* name)
-{
-    return XInternAtom (display, name, True);
-}
-
-Atom Atoms::getCreating (::Display* display, const char* name)
-{
-    return XInternAtom (display, name, False);
-}
+Atom Atoms::getIfExists (::Display* display, const char* name)  { return XInternAtom (display, name, True); }
+Atom Atoms::getCreating (::Display* display, const char* name)  { return XInternAtom (display, name, False); }
 
 String Atoms::getName (::Display* display, const Atom atom)
 {
@@ -321,7 +325,6 @@ const unsigned long Atoms::DndVersion = 3;
 GetXProperty::GetXProperty (::Display* display, Window window, Atom atom,
               long offset, long length, bool shouldDelete,
               Atom requestedType)
-    : data (nullptr)
 {
     success = (XGetWindowProperty (display, window, atom, offset, length,
                                    (Bool) shouldDelete, requestedType, &actualType,
@@ -334,3 +337,5 @@ GetXProperty::~GetXProperty()
     if (data != nullptr)
         XFree (data);
 }
+
+} // namespace juce
