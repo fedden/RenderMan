@@ -2,7 +2,8 @@
 
 <JUCERPROJECT id="EHAJpP" name="RenderMan" projectType="dll" version="1.0.0"
               bundleIdentifier="com.yourcompany.RenderMan" includeBinaryInAppConfig="1"
-              jucerVersion="4.3.1">
+              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" cppLanguageStandard="11" companyCopyright="">
   <MAINGROUP id="tONOKg" name="RenderMan">
     <GROUP id="{4A809F36-0B47-21E3-7688-8CF65B68EF74}" name="Maximilian">
       <GROUP id="{581DA4A2-AF43-FE18-47C2-CA1585A8F30E}" name="libs">
@@ -28,15 +29,15 @@
     <FILE id="PqgGm9" name="source.cpp" compile="1" resource="0" file="Source/source.cpp"/>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" vst3Folder="" extraLinkerFlags="-shared -lpython2.7 -lboost_python"
+    <XCODE_MAC targetFolder="Builds/MacOSX" vst3Folder="VST3_SDK" extraLinkerFlags="-shared -lpython2.7 -lboost_python"
                extraCompilerFlags="-fPIC">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="librenderman.so"
                        osxCompatibility="10.9 SDK" osxArchitecture="Native" headerPath="/usr/include/python2.7&#10;/usr/local/include&#10;"
-                       libraryPath="/usr/local/lib"/>
+                       libraryPath="/usr/local/lib" enablePluginBinaryCopyStep="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="librenderman.so"
                        osxCompatibility="10.9 SDK" osxArchitecture="Native" headerPath="/usr/include/python2.7&#10;/usr/local/include&#10;"
-                       libraryPath="/usr/local/lib"/>
+                       libraryPath="/usr/local/lib" enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
@@ -54,12 +55,15 @@
         <MODULEPATH id="juce_audio_processors" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2015 targetFolder="Builds/VisualStudio2015" vst3Folder="">
+    <VS2015 targetFolder="Builds/VisualStudio2015" vst3Folder="VST3_SDK"
+            windowsTargetPlatformVersion="8.1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="renderman"/>
+                       isDebug="1" optimisation="1" targetName="renderman" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="renderman"/>
+                       isDebug="0" optimisation="3" targetName="renderman" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0" linkTimeOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
@@ -77,12 +81,15 @@
         <MODULEPATH id="juce_audio_processors" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </VS2015>
-    <VS2013 targetFolder="Builds/VisualStudio2013">
+    <VS2013 targetFolder="Builds/VisualStudio2013" vst3Folder="VST3_SDK"
+            windowsTargetPlatformVersion="8.1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="renderman"/>
+                       isDebug="1" optimisation="1" targetName="renderman" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="renderman"/>
+                       isDebug="0" optimisation="3" targetName="renderman" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0" linkTimeOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="JuceLibraryCode/modules"/>
@@ -100,7 +107,7 @@
         <MODULEPATH id="juce_audio_processors" path="JuceLibraryCode/modules"/>
       </MODULEPATHS>
     </VS2013>
-    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vst3Folder="" extraCompilerFlags="-fPIC"
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vst3Folder="VST3_SDK" extraCompilerFlags="-fPIC"
                 extraLinkerFlags="-shared -lpython2.7 -lboost_python" cppLanguageStandard="-std=c++11">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="renderman"
@@ -126,19 +133,19 @@
     </LINUX_MAKE>
   </EXPORTFORMATS>
   <MODULES>
-    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_core" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_events" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="1"/>
-    <MODULE id="juce_video" showAllCode="1" useLocalCopy="1"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="1" useGlobalPath="1"/>
   </MODULES>
   <JUCEOPTIONS JUCE_PLUGINHOST_VST="enabled" JUCE_PLUGINHOST_VST3="enabled"
                JUCE_PLUGINHOST_AU="enabled" JUCE_CHECK_MEMORY_LEAKS="disabled"/>

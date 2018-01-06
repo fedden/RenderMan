@@ -39,18 +39,6 @@ We can plot the output audio frames easily by using matplotlib.
 
 ## Building / Installation
 
-First, obtain Steinberg's VST SDK. [Obtain it from here](https://www.steinberg.net/en/company/developers.html), last time I checked it was on 3.6.6.
-
-We need to ensure a folder titled 'SDKs' exists at the home directory.
-```
-mkdir ~/SDKs
-```
-
-Ensure the VST3 SDK is moved to the folder "~/SDKs/" so that JUCE can find the VST SDK headers.
-```
-mv ~/Downloads/VST3\ SDK/ ~/SDKs/
-```
-
 ### MacOS
 
 If you haven't already, [get brew](https://brew.sh/). The last time I checked the command to install was simply this:
