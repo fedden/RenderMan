@@ -1,0 +1,30 @@
+language: cpp
+compiler: clang
+os:
+  - linux
+  - osx
+
+# Linux dependencies
+addons:
+  apt:
+    packages:
+      - libboost-python-dev
+      - libfreetype6-dev
+      - libx11-dev
+      - libxinerama-dev
+      - libxrandr-dev
+      - libxcursor-dev
+      - mesa-common-dev
+      - libasound2-dev
+      - freeglut3-dev
+      - libxcomposite-dev
+      - libcurl4-gnutls-dev
+
+# OSX dependencies 
+install:
+  - if [ $TRAVIS_OS_NAME = osx   ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install boost-python;      fi
+
+# build
+script:
+  - if [ $TRAVIS_OS_NAME = linux ]; then  make --directory=Builds/LinuxMakefile/;                  fi
+  - if [ $TRAVIS_OS_NAME = osx   ]; then  xcodebuild -project Builds/MacOSX/RenderMan.xcodeproj/;  fi
