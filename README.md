@@ -200,6 +200,10 @@ We can get a completely random patch sampled from PRNG in the same way above.
 list_of_tuples(int, float) get_random_patch()
 ```
 
+## Contributors
+
+I want to express my deep gratitude to [jgefele](https://github.com/jgefele). It is very touching that people want to use this code let alone contribute to it - thanks!
+
 ## Context and Contact
 This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VST and learnt close parameters [here](http://doc.gold.ac.uk/~lfedd001/tf_fm_synth_learn.html). Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line on here or leonfedden (at) gmail.com :)
 
