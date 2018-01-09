@@ -205,7 +205,7 @@ list_of_tuples(int, float) get_random_patch()
 I want to express my deep gratitude to [jgefele](https://github.com/jgefele). It is very touching that people want to use this code let alone contribute to it - thanks!
 
 ## Context and Contact
-This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VST and learnt close parameters [here](http://doc.gold.ac.uk/~lfedd001/tf_fm_synth_learn.html). Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line on here or leonfedden (at) gmail.com :)
+This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VST and learnt synthesiser using a neural network to sound match target sounds [here](http://doc.gold.ac.uk/~lfedd001/tf_fm_synth_learn.html). Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line on here or leonfedden (at) gmail.com :)
 
 Finally, doing something cool with this library? Let me know what you are up to! And if this code was useful for you then please kindly drop me a GitHub star so more developers will trust and use this code.
 
