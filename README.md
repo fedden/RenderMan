@@ -9,6 +9,10 @@
 * *  Command Line VST Audio, Features and Parameter Renderer  * *
 ```
 
+| `build` |
+|:-------:|
+| [![Build Status](https://travis-ci.org/fedden/RenderMan.svg?branch=master)](https://travis-ci.org/fedden/RenderMan) |
+
 # RenderMan
 
 Renderman is a command line VST host written in C++ with Python bindings using [JUCE](https://github.com/julianstorer/JUCE) and [Maximilian](https://github.com/micknoise/Maximilian) libraries for the backend. It is designed with ease of use in mind to extract audio and features from VST plugins. It has a fast growing list of features, including setting, getting parameters from synthesiers, setting whole patches, getting random patches, obtaining MFCCS, FFT, audio data and much more.
