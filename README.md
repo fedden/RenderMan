@@ -6,7 +6,7 @@
        | |\ \  __/ | | | (_| |  __/ |  | |  | | (_| | | | |
        \_| \_\___|_| |_|\__,_|\___|_|  \_|  |_/\__,_|_| |_|
 
-* *  Command Line VST Audio, Features and Parameter Renderer  * *
+* *  Command Line VSTi Audio, Features and Parameter Renderer  * *
 ```
 
 | `build` |
@@ -15,7 +15,7 @@
 
 # RenderMan
 
-Renderman is a command line VST host written in C++ with Python bindings using [JUCE](https://github.com/julianstorer/JUCE) and [Maximilian](https://github.com/micknoise/Maximilian) libraries for the backend. It is designed with ease of use in mind to extract audio and features from VST plugins. It has a fast growing list of features, including setting, getting parameters from synthesiers, setting whole patches, getting random patches, obtaining MFCCS, FFT, audio data and much more.
+Renderman is a command line VSTi host written in C++ with Python bindings using [JUCE](https://github.com/julianstorer/JUCE) and [Maximilian](https://github.com/micknoise/Maximilian) libraries for the backend. It is designed with ease of use in mind to extract audio and features from VSTi plugins. It has a fast growing list of features, including setting, getting parameters from synthesiers, setting whole patches, getting random patches, obtaining MFCCS, FFT, audio data and much more.
 
 A usage example in the form of an IPython notebook can be found [here](http://doc.gold.ac.uk/~lfedd001/renderman.html).
 
@@ -209,7 +209,7 @@ list_of_tuples(int, float) get_random_patch()
 I want to express my deep gratitude to [jgefele](https://github.com/jgefele). It is very touching that people want to use this code let alone contribute to it - thanks!
 
 ## Context and Contact
-This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VST and learnt synthesiser using a neural network to sound match target sounds [here](http://doc.gold.ac.uk/~lfedd001/tf_fm_synth_learn.html). Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line on here or leonfedden (at) gmail.com :)
+This library is a work in progress for my final year project where I am using Neural Networks to generate synth patches to create desired sounds. For example, I wrote a toy VSTi and learnt synthesiser using a neural network to sound match target sounds [here](http://doc.gold.ac.uk/~lfedd001/tf_fm_synth_learn.html). Everything this library has facilitates that but I recognise there may be more applications so if there are any feature requests please drop me a line on here or leonfedden (at) gmail.com :)
 
 Finally, doing something cool with this library? Let me know what you are up to! And if this code was useful for you then please kindly drop me a GitHub star so more developers will trust and use this code.
 
