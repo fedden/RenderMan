@@ -118,6 +118,16 @@ namespace wrap
             RenderEngine::setPatch(patch);
         }
 
+        float wrapperGetParameter (int parameter)
+        {
+            return RenderEngine::getParameter(parameter);
+        }
+
+        void wrapperSetParameter (int parameter, float value)
+        {
+            RenderEngine::setParameter(parameter, value);
+        }
+
         boost::python::list wrapperGetPatch()
         {
             return pluginPatchToListOfTuples (RenderEngine::getPatch());
@@ -126,7 +136,8 @@ namespace wrap
         void wrapperRenderPatch (int    midiNote,
                                  int    midiVelocity,
                                  double noteLength,
-                                 double renderLength)
+                                 double renderLength,
+                                 bool overridePatch = true)
         {
             if (midiNote > 255) midiNote = 255;
             if (midiNote < 0) midiNote = 0;
@@ -135,7 +146,8 @@ namespace wrap
             RenderEngine::renderPatch(midiNote,
                                       midiVelocity,
                                       noteLength,
-                                      renderLength);
+                                      renderLength,
+                                      overridePatch);
         }
 
         boost::python::list wrapperGetMFCCFrames()
@@ -191,9 +203,12 @@ BOOST_PYTHON_MODULE(librenderman)
     using namespace wrap;
 
     class_<RenderEngineWrapper>("RenderEngine", init<int, int, int>())
+    .def("load_preset", &RenderEngineWrapper::loadPreset)
     .def("load_plugin", &RenderEngineWrapper::loadPlugin)
-    .def("set_patch", &RenderEngineWrapper::wrapperSetPatch)
     .def("get_patch", &RenderEngineWrapper::wrapperGetPatch)
+    .def("set_patch", &RenderEngineWrapper::wrapperSetPatch)
+    .def("get_parameter", &RenderEngineWrapper::wrapperGetParameter)
+    .def("set_parameter", &RenderEngineWrapper::wrapperSetParameter)
     .def("render_patch", &RenderEngineWrapper::wrapperRenderPatch)
     .def("get_mfcc_frames", &RenderEngineWrapper::wrapperGetMFCCFrames)
     .def("get_plugin_parameter_size", &RenderEngineWrapper::wrapperGetPluginParameterSize)
