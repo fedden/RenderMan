@@ -35,19 +35,21 @@ namespace juce
     a platform-specific subclass that can be used.
 
     The CustomTypeface subclass allow you to build your own typeface, and to
-    load and save it in the Juce typeface format.
+    load and save it in the JUCE typeface format.
 
     Normally you should never need to deal directly with Typeface objects - the Font
     class does everything you typically need for rendering text.
 
     @see CustomTypeface, Font
+
+    @tags{Graphics}
 */
 class JUCE_API  Typeface  : public ReferenceCountedObject
 {
 public:
     //==============================================================================
     /** A handy typedef for a pointer to a typeface. */
-    typedef ReferenceCountedObjectPtr<Typeface> Ptr;
+    using Ptr = ReferenceCountedObjectPtr<Typeface>;
 
     //==============================================================================
     /** Returns the font family of the typeface.
@@ -73,7 +75,7 @@ public:
 
     //==============================================================================
     /** Destructor. */
-    virtual ~Typeface();
+    ~Typeface() override;
 
     /** Returns true if this typeface can be used to render the specified font.
         When called, the font will already have been checked to make sure that its name and
@@ -95,7 +97,7 @@ public:
     */
     virtual float getDescent() const = 0;
 
-    /** Returns the value by which you should multiply a juce font-height value to
+    /** Returns the value by which you should multiply a JUCE font-height value to
         convert it to the equivalent point-size.
     */
     virtual float getHeightToPointsFactor() const = 0;
@@ -117,7 +119,7 @@ public:
     */
     virtual bool getOutlineForGlyph (int glyphNumber, Path& path) = 0;
 
-    /** Returns a new EdgeTable that contains the path for the givem glyph, with the specified transform applied. */
+    /** Returns a new EdgeTable that contains the path for the given glyph, with the specified transform applied. */
     virtual EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight);
 
     /** Returns true if the typeface uses hinting. */
@@ -131,7 +133,7 @@ public:
     static void clearTypefaceCache();
 
     /** On some platforms, this allows a specific path to be scanned.
-        Currently only available when using FreeType.
+        On macOS you can load .ttf and .otf files, otherwise this is only available when using FreeType.
     */
     static void scanFolderForFonts (const File& folder);
 
@@ -151,8 +153,7 @@ protected:
 
 private:
     struct HintingParams;
-    friend struct ContainerDeletePolicy<HintingParams>;
-    ScopedPointer<HintingParams> hintingParams;
+    std::unique_ptr<HintingParams> hintingParams;
     CriticalSection hintingLock;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface)

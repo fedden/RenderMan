@@ -46,7 +46,7 @@ AudioProcessorEditor::~AudioProcessorEditor()
     // if this fails, then the wrapper hasn't called editorBeingDeleted() on the
     // filter for some reason..
     jassert (processor.getActiveEditor() != this);
-    removeComponentListener (resizeListener);
+    removeComponentListener (resizeListener.get());
 }
 
 void AudioProcessorEditor::setControlHighlight (ParameterControlHighlightInfo) {}
@@ -77,7 +77,8 @@ void AudioProcessorEditor::initialise()
     resizable = false;
 
     attachConstrainer (&defaultConstrainer);
-    addComponentListener (resizeListener = new AudioProcessorEditorListener (*this));
+    resizeListener.reset (new AudioProcessorEditorListener (*this));
+    addComponentListener (resizeListener.get());
 }
 
 //==============================================================================
@@ -87,18 +88,13 @@ void AudioProcessorEditor::setResizable (const bool shouldBeResizable, const boo
     {
         resizable = shouldBeResizable;
 
-        if (! resizable)
+        if (! resizable && constrainer == &defaultConstrainer)
         {
-            setConstrainer (&defaultConstrainer);
+            auto width = getWidth();
+            auto height = getHeight();
 
-            if (auto w = getWidth())
-            {
-                if (auto h = getHeight())
-                {
-                    defaultConstrainer.setSizeLimits (w, h, w, h);
-                    resized();
-                }
-            }
+            if (width > 0 && height > 0)
+                defaultConstrainer.setSizeLimits (width, height, width, height);
         }
     }
 
@@ -107,14 +103,9 @@ void AudioProcessorEditor::setResizable (const bool shouldBeResizable, const boo
     if (shouldHaveCornerResizer != (resizableCorner != nullptr))
     {
         if (shouldHaveCornerResizer)
-        {
-            Component::addChildComponent (resizableCorner = new ResizableCornerComponent (this, constrainer));
-            resizableCorner->setAlwaysOnTop (true);
-        }
+            attachResizableCornerComponent();
         else
-        {
-            resizableCorner = nullptr;
-        }
+            resizableCorner.reset();
     }
 }
 
@@ -144,8 +135,14 @@ void AudioProcessorEditor::setConstrainer (ComponentBoundsConstrainer* newConstr
 {
     if (constrainer != newConstrainer)
     {
-        resizable = true;
+        if (newConstrainer != nullptr)
+            resizable = (newConstrainer->getMinimumWidth()  != newConstrainer->getMaximumWidth()
+                      || newConstrainer->getMinimumHeight() != newConstrainer->getMaximumHeight());
+
         attachConstrainer (newConstrainer);
+
+        if (resizableCorner != nullptr)
+            attachResizableCornerComponent();
     }
 }
 
@@ -156,6 +153,14 @@ void AudioProcessorEditor::attachConstrainer (ComponentBoundsConstrainer* newCon
         constrainer = newConstrainer;
         updatePeer();
     }
+}
+
+void AudioProcessorEditor::attachResizableCornerComponent()
+{
+    resizableCorner.reset (new ResizableCornerComponent (this, constrainer));
+    Component::addChildComponent (resizableCorner.get());
+    resizableCorner->setAlwaysOnTop (true);
+    editorResized (true);
 }
 
 void AudioProcessorEditor::setBoundsConstrained (Rectangle<int> newBounds)
@@ -203,6 +208,25 @@ void AudioProcessorEditor::setScaleFactor (float newScale)
 {
     setTransform (AffineTransform::scale (newScale));
     editorResized (true);
+}
+
+//==============================================================================
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
+ typedef ComponentPeer* (*createUnityPeerFunctionType) (Component&);
+ createUnityPeerFunctionType juce_createUnityPeerFn = nullptr;
+#endif
+
+ComponentPeer* AudioProcessorEditor::createNewPeer (int styleFlags, void* nativeWindow)
+{
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client && JucePlugin_Build_Unity
+    if (juce_createUnityPeerFn != nullptr)
+    {
+        ignoreUnused (styleFlags, nativeWindow);
+        return juce_createUnityPeerFn (*this);
+    }
+   #endif
+
+    return Component::createNewPeer (styleFlags, nativeWindow);
 }
 
 } // namespace juce

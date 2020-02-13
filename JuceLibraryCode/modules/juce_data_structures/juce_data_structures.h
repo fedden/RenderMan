@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -33,15 +34,15 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_data_structures
-  vendor:           juce
-  version:          5.2.0
-  name:             JUCE data model helper classes
-  description:      Classes for undo/redo management, and smart data structures.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_data_structures
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE data model helper classes
+  description:        Classes for undo/redo management, and smart data structures.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_events
+  dependencies:       juce_events
 
  END_JUCE_MODULE_DECLARATION
 
@@ -60,5 +61,6 @@
 #include "values/juce_ValueTree.h"
 #include "values/juce_ValueTreeSynchroniser.h"
 #include "values/juce_CachedValue.h"
+#include "values/juce_ValueWithDefault.h"
 #include "app_properties/juce_PropertiesFile.h"
 #include "app_properties/juce_ApplicationProperties.h"

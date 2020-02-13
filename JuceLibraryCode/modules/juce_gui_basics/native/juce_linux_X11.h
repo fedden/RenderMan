@@ -36,13 +36,13 @@ typedef unsigned long WindowType;
 
 
 //==============================================================================
-class XWindowSystem
+class XWindowSystem :  public DeletedAtShutdown
 {
 public:
     XDisplay displayRef() noexcept;
     XDisplay displayUnref() noexcept;
 
-    juce_DeclareSingleton (XWindowSystem, false)
+    JUCE_DECLARE_SINGLETON (XWindowSystem, false)
 
 private:
     XDisplay display = {};
@@ -56,7 +56,10 @@ private:
 };
 
 //==============================================================================
-/** Creates and holds a reference to the X display. */
+/** Creates and holds a reference to the X display.
+
+    @tags{GUI}
+*/
 struct ScopedXDisplay
 {
     ScopedXDisplay();
@@ -68,12 +71,14 @@ struct ScopedXDisplay
 //==============================================================================
 /** A handy class that uses XLockDisplay and XUnlockDisplay to lock the X server
     using RAII (Only available in Linux!).
+
+    @tags{GUI}
 */
 class ScopedXLock
 {
 public:
     /** Creating a ScopedXLock object locks the X display.
-        This uses XLockDisplay() to grab the display that Juce is using.
+        This uses XLockDisplay() to grab the display that JUCE is using.
     */
     ScopedXLock (XDisplay);
 
@@ -132,6 +137,41 @@ struct GetXProperty
     unsigned long numItems, bytesLeft;
     AtomType actualType;
     int actualFormat;
+};
+
+//==============================================================================
+enum
+{
+    maxXEmbedVersionToSupport = 0
+};
+
+enum
+{
+    XEMBED_MAPPED  = (1<<0)
+};
+
+enum
+{
+    XEMBED_EMBEDDED_NOTIFY        = 0,
+    XEMBED_WINDOW_ACTIVATE        = 1,
+    XEMBED_WINDOW_DEACTIVATE      = 2,
+    XEMBED_REQUEST_FOCUS          = 3,
+    XEMBED_FOCUS_IN               = 4,
+    XEMBED_FOCUS_OUT              = 5,
+    XEMBED_FOCUS_NEXT             = 6,
+    XEMBED_FOCUS_PREV             = 7,
+    XEMBED_MODALITY_ON            = 10,
+    XEMBED_MODALITY_OFF           = 11,
+    XEMBED_REGISTER_ACCELERATOR   = 12,
+    XEMBED_UNREGISTER_ACCELERATOR = 13,
+    XEMBED_ACTIVATE_ACCELERATOR   = 14
+};
+
+enum
+{
+    XEMBED_FOCUS_CURRENT = 0,
+    XEMBED_FOCUS_FIRST   = 1,
+    XEMBED_FOCUS_LAST    = 2
 };
 
 } // namespace juce

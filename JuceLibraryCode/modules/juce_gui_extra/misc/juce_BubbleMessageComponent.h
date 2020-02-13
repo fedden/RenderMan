@@ -35,6 +35,8 @@ namespace juce
     pointing to a particular component or location on the screen.
 
     @see BubbleComponent
+
+    @tags{GUI}
 */
 class JUCE_API  BubbleMessageComponent  : public BubbleComponent,
                                           private Timer
@@ -54,7 +56,7 @@ public:
     BubbleMessageComponent (int fadeOutLengthMs = 150);
 
     /** Destructor. */
-    ~BubbleMessageComponent();
+    ~BubbleMessageComponent() override;
 
     //==============================================================================
     /** Shows a message bubble at a particular position.
@@ -68,7 +70,7 @@ public:
         @param position                         the coords of the object to point to
         @param message                          the text to display
         @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
-                                                from its parent compnent. If this is 0 or less, it
+                                                from its parent component. If this is 0 or less, it
                                                 will stay there until manually removed.
         @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
                                                 mouse button is pressed (anywhere on the screen)
@@ -91,7 +93,7 @@ public:
         @param component                        the component that you want to point at
         @param message                          the text to display
         @param numMillisecondsBeforeRemoving    how long to leave it on the screen before removing itself
-                                                from its parent compnent. If this is 0 or less, it
+                                                from its parent component. If this is 0 or less, it
                                                 will stay there until manually removed.
         @param removeWhenMouseClicked           if this is true, the bubble will disappear as soon as a
                                                 mouse button is pressed (anywhere on the screen)

@@ -36,6 +36,8 @@ namespace juce
 
     You can retrieve the hash as a raw 32-byte block, or as a 64-digit hex string.
     @see MD5
+
+    @tags{Cryptography}
 */
 class JUCE_API  SHA256
 {
@@ -45,16 +47,16 @@ public:
         The default constructor just creates a hash filled with zeros. (This is not
         equal to the hash of an empty block of data).
     */
-    SHA256() noexcept;
+    SHA256();
 
     /** Destructor. */
-    ~SHA256() noexcept;
+    ~SHA256();
 
     /** Creates a copy of another SHA256. */
-    SHA256 (const SHA256& other) noexcept;
+    SHA256 (const SHA256&);
 
     /** Copies another SHA256. */
-    SHA256& operator= (const SHA256& other) noexcept;
+    SHA256& operator= (const SHA256&);
 
     //==============================================================================
     /** Creates a hash from a block of raw data. */
@@ -98,7 +100,7 @@ public:
 
 private:
     //==============================================================================
-    uint8 result [32];
+    uint8 result[32] = {};
     void process (const void*, size_t);
 
     JUCE_LEAK_DETECTOR (SHA256)

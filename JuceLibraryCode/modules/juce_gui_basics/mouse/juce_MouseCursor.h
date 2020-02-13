@@ -33,6 +33,8 @@ namespace juce
 
     This object can either be used to represent one of the standard mouse
     cursor shapes, or a custom one generated from an image.
+
+    @tags{GUI}
 */
 class JUCE_API  MouseCursor  final
 {
@@ -44,7 +46,7 @@ public:
         ParentCursor = 0,               /**< Indicates that the component's parent's cursor should be used. */
 
         NoCursor,                       /**< An invisible cursor. */
-        NormalCursor,                   /**< The stardard arrow cursor. */
+        NormalCursor,                   /**< The standard arrow cursor. */
 
         WaitCursor,                     /**< The normal hourglass or spinning-beachball 'busy' cursor. */
         IBeamCursor,                    /**< A vertical I-beam for positioning within text. */
@@ -166,14 +168,13 @@ private:
     //==============================================================================
     class SharedCursorHandle;
     friend class SharedCursorHandle;
-    SharedCursorHandle* cursorHandle;
+    SharedCursorHandle* cursorHandle = nullptr;
 
     friend class MouseInputSourceInternal;
-    void showInWindow (ComponentPeer* window) const;
-    void showInAllWindows() const;
+    void showInWindow (ComponentPeer*) const;
     void* getHandle() const noexcept;
 
-    static void* createStandardMouseCursor (MouseCursor::StandardCursorType type);
+    static void* createStandardMouseCursor (MouseCursor::StandardCursorType);
     static void deleteMouseCursor (void* cursorHandle, bool isStandard);
 
     JUCE_LEAK_DETECTOR (MouseCursor)

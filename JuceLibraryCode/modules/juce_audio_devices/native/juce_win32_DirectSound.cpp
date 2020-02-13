@@ -23,7 +23,7 @@
 extern "C"
 {
     // Declare just the minimum number of interfaces for the DSound objects that we need..
-    typedef struct typeDSBUFFERDESC
+    struct DSBUFFERDESC
     {
         DWORD dwSize;
         DWORD dwFlags;
@@ -31,7 +31,7 @@ extern "C"
         DWORD dwReserved;
         LPWAVEFORMATEX lpwfxFormat;
         GUID guid3DAlgorithm;
-    } DSBUFFERDESC;
+    };
 
     struct IDirectSoundBuffer;
 
@@ -80,14 +80,14 @@ extern "C"
     };
 
     //==============================================================================
-    typedef struct typeDSCBUFFERDESC
+    struct DSCBUFFERDESC
     {
         DWORD dwSize;
         DWORD dwFlags;
         DWORD dwBufferBytes;
         DWORD dwReserved;
         LPWAVEFORMATEX lpwfxFormat;
-    } DSCBUFFERDESC;
+    };
 
     struct IDirectSoundCaptureBuffer;
 
@@ -514,7 +514,6 @@ private:
     IDirectSoundBuffer* pOutputBuffer;
     DWORD writeOffset;
     int totalBytesPerBuffer, bytesPerBuffer;
-    unsigned int lastPlayCursor;
 
     bool firstPlayTime;
     int64 lastPlayTime, ticksPerBuffer;
@@ -741,7 +740,7 @@ public:
                          const int outputDeviceIndex_,
                          const int inputDeviceIndex_)
         : AudioIODevice (deviceName, "DirectSound"),
-          Thread ("Juce DSound"),
+          Thread ("JUCE DSound"),
           outputDeviceIndex (outputDeviceIndex_),
           inputDeviceIndex (inputDeviceIndex_)
     {
@@ -892,7 +891,7 @@ private:
     int bufferSizeSamples = 0;
     double sampleRate = 0;
     BigInteger enabledInputs, enabledOutputs;
-    AudioSampleBuffer inputBuffers, outputBuffers;
+    AudioBuffer<float> inputBuffers, outputBuffers;
 
     AudioIODeviceCallback* callback = nullptr;
     CriticalSection startStopLock;
@@ -908,8 +907,6 @@ private:
 
         inChans.clear();
         outChans.clear();
-        inputBuffers.setSize (1, 1);
-        outputBuffers.setSize (1, 1);
     }
 
     void resync()
@@ -1096,7 +1093,7 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 {
     closeDevice();
 
-    sampleRate = sampleRate_;
+    sampleRate = sampleRate_ > 0.0 ? sampleRate_ : 44100.0;
 
     if (bufferSizeSamples_ <= 0)
         bufferSizeSamples_ = 960; // use as a default size if none is set.
@@ -1111,7 +1108,7 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
                             enabledInputs.getHighestBit() + 1 - inChannels.size(),
                             false);
 
-    inputBuffers.setSize (jmax (1, enabledInputs.countNumberOfSetBits()), bufferSizeSamples);
+    inputBuffers.setSize (enabledInputs.countNumberOfSetBits(), bufferSizeSamples);
     inputBuffers.clear();
     int numIns = 0;
 
@@ -1132,7 +1129,7 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
                              enabledOutputs.getHighestBit() + 1 - outChannels.size(),
                              false);
 
-    outputBuffers.setSize (jmax (1, enabledOutputs.countNumberOfSetBits()), bufferSizeSamples);
+    outputBuffers.setSize (enabledOutputs.countNumberOfSetBits(), bufferSizeSamples);
     outputBuffers.clear();
     int numOuts = 0;
 
@@ -1217,13 +1214,13 @@ public:
         initialiseDSoundFunctions();
     }
 
-    void scanForDevices()
+    void scanForDevices() override
     {
         hasScanned = true;
         deviceList.scan();
     }
 
-    StringArray getDeviceNames (bool wantInputNames) const
+    StringArray getDeviceNames (bool wantInputNames) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1231,13 +1228,13 @@ public:
                               : deviceList.outputDeviceNames;
     }
 
-    int getDefaultDeviceIndex (bool /*forInput*/) const
+    int getDefaultDeviceIndex (bool /*forInput*/) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
         return 0;
     }
 
-    int getIndexOfDevice (AudioIODevice* device, bool asInput) const
+    int getIndexOfDevice (AudioIODevice* device, bool asInput) const override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1248,10 +1245,10 @@ public:
         return -1;
     }
 
-    bool hasSeparateInputsAndOutputs() const    { return true; }
+    bool hasSeparateInputsAndOutputs() const override   { return true; }
 
     AudioIODevice* createDevice (const String& outputDeviceName,
-                                 const String& inputDeviceName)
+                                 const String& inputDeviceName) override
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 

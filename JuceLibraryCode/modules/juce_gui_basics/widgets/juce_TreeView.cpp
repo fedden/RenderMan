@@ -440,7 +440,7 @@ TreeView::TreeView (const String& name)
     : Component (name),
       viewport (new TreeViewport())
 {
-    addAndMakeVisible (viewport);
+    addAndMakeVisible (viewport.get());
     viewport->setViewedComponent (new ContentComponent (*this));
     setWantsKeyboardFocus (true);
 }
@@ -484,7 +484,7 @@ void TreeView::setRootItem (TreeViewItem* const newRootItem)
 
 void TreeView::deleteRootItem()
 {
-    const ScopedPointer<TreeViewItem> deleter (rootItem);
+    const std::unique_ptr<TreeViewItem> deleter (rootItem);
     setRootItem (nullptr);
 }
 
@@ -547,7 +547,7 @@ void TreeView::setOpenCloseButtonsVisible (const bool shouldBeVisible)
 
 Viewport* TreeView::getViewport() const noexcept
 {
-    return viewport;
+    return viewport.get();
 }
 
 //==============================================================================
@@ -610,13 +610,13 @@ static void addAllSelectedItemIds (TreeViewItem* item, XmlElement& parent)
         addAllSelectedItemIds (item->getSubItem(i), parent);
 }
 
-XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) const
+std::unique_ptr<XmlElement> TreeView::getOpennessState (bool alsoIncludeScrollPosition) const
 {
-    XmlElement* e = nullptr;
+    std::unique_ptr<XmlElement> e;
 
     if (rootItem != nullptr)
     {
-        e = rootItem->getOpennessState (false);
+        e.reset (rootItem->getOpennessState (false));
 
         if (e != nullptr)
         {
@@ -1008,8 +1008,11 @@ void TreeView::showDragHighlight (const InsertPoint& insertPos) noexcept
 
     if (dragInsertPointHighlight == nullptr)
     {
-        addAndMakeVisible (dragInsertPointHighlight = new InsertPointHighlight());
-        addAndMakeVisible (dragTargetGroupHighlight = new TargetGroupHighlight());
+        dragInsertPointHighlight.reset (new InsertPointHighlight());
+        dragTargetGroupHighlight.reset (new TargetGroupHighlight());
+
+        addAndMakeVisible (dragInsertPointHighlight.get());
+        addAndMakeVisible (dragTargetGroupHighlight.get());
     }
 
     dragInsertPointHighlight->setTargetPosition (insertPos, viewport->getViewWidth());
@@ -1018,8 +1021,8 @@ void TreeView::showDragHighlight (const InsertPoint& insertPos) noexcept
 
 void TreeView::hideDragHighlight() noexcept
 {
-    dragInsertPointHighlight = nullptr;
-    dragTargetGroupHighlight = nullptr;
+    dragInsertPointHighlight.reset();
+    dragTargetGroupHighlight.reset();
 }
 
 void TreeView::handleDrag (const StringArray& files, const SourceDetails& dragSourceDetails)
@@ -1855,12 +1858,12 @@ void TreeViewItem::restoreOpennessState (const XmlElement& e)
     }
 }
 
-XmlElement* TreeViewItem::getOpennessState() const
+std::unique_ptr<XmlElement> TreeViewItem::getOpennessState() const
 {
-    return getOpennessState (true);
+    return std::unique_ptr<XmlElement> (getOpennessState (true));
 }
 
-XmlElement* TreeViewItem::getOpennessState (const bool canReturnNull) const
+XmlElement* TreeViewItem::getOpennessState (bool canReturnNull) const
 {
     auto name = getUniqueName();
 

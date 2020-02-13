@@ -54,6 +54,8 @@ bool ChildProcess::waitForProcessToFinish (const int timeoutMs) const
     {
         if (! isRunning())
             return true;
+
+        Thread::sleep (2);
     }
     while (timeoutMs < 0 || Time::getMillisecondCounter() < timeoutTime);
 
@@ -66,8 +68,8 @@ String ChildProcess::readAllProcessOutput()
 
     for (;;)
     {
-        char buffer [512];
-        const int num = readProcessOutput (buffer, sizeof (buffer));
+        char buffer[512];
+        auto num = readProcessOutput (buffer, sizeof (buffer));
 
         if (num <= 0)
             break;
@@ -78,13 +80,17 @@ String ChildProcess::readAllProcessOutput()
     return result.toString();
 }
 
+
+//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
 class ChildProcessTests  : public UnitTest
 {
 public:
-    ChildProcessTests() : UnitTest ("ChildProcess", "Threads") {}
+    ChildProcessTests()
+        : UnitTest ("ChildProcess", UnitTestCategories::threads)
+    {}
 
     void runTest() override
     {
@@ -99,8 +105,8 @@ public:
         expect (p.start ("ls /"));
        #endif
 
-        //String output (p.readAllProcessOutput());
-        //expect (output.isNotEmpty());
+        auto output = p.readAllProcessOutput();
+        expect (output.isNotEmpty());
       #endif
     }
 };

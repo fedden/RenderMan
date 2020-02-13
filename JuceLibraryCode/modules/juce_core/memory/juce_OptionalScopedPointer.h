@@ -28,10 +28,10 @@ namespace juce
     Holds a pointer to an object which can optionally be deleted when this pointer
     goes out of scope.
 
-    This acts in many ways like a ScopedPointer, but allows you to specify whether or
+    This acts in many ways like a std::unique_ptr, but allows you to specify whether or
     not the object is deleted.
 
-    @see ScopedPointer
+    @tags{Core}
 */
 template <class ObjectType>
 class OptionalScopedPointer
@@ -39,12 +39,12 @@ class OptionalScopedPointer
 public:
     //==============================================================================
     /** Creates an empty OptionalScopedPointer. */
-    OptionalScopedPointer() : shouldDelete (false) {}
+    OptionalScopedPointer() = default;
 
     /** Creates an OptionalScopedPointer to point to a given object, and specifying whether
         the OptionalScopedPointer will delete it.
 
-        If takeOwnership is true, then the OptionalScopedPointer will act like a ScopedPointer,
+        If takeOwnership is true, then the OptionalScopedPointer will act like a std::unique_ptr,
         deleting the object when it is itself deleted. If this parameter is false, then the
         OptionalScopedPointer just holds a normal pointer to the object, and won't delete it.
     */
@@ -55,7 +55,7 @@ public:
 
     /** Takes ownership of the object that another OptionalScopedPointer holds.
 
-        Like a normal ScopedPointer, the objectToTransferFrom object will become null,
+        Like a normal std::unique_ptr, the objectToTransferFrom object will become null,
         as ownership of the managed object is transferred to this object.
 
         The flag to indicate whether or not to delete the managed object is also
@@ -69,7 +69,7 @@ public:
 
     /** Takes ownership of the object that another OptionalScopedPointer holds.
 
-        Like a normal ScopedPointer, the objectToTransferFrom object will become null,
+        Like a normal std::unique_ptr, the objectToTransferFrom object will become null,
         as ownership of the managed object is transferred to this object.
 
         The ownership flag that says whether or not to delete the managed object is also
@@ -79,8 +79,8 @@ public:
     {
         if (object != objectToTransferFrom.object)
         {
-            clear();
-            object = objectToTransferFrom.object;
+            reset();
+            object.reset (objectToTransferFrom.object.release());
         }
 
         shouldDelete = objectToTransferFrom.shouldDelete;
@@ -93,21 +93,21 @@ public:
     */
     ~OptionalScopedPointer()
     {
-        clear();
+        reset();
     }
 
     //==============================================================================
     /** Returns the object that this pointer is managing. */
-    inline operator ObjectType*() const noexcept                    { return object; }
+    inline operator ObjectType*() const noexcept                    { return object.get(); }
 
     /** Returns the object that this pointer is managing. */
-    inline ObjectType* get() const noexcept                         { return object; }
+    inline ObjectType* get() const noexcept                         { return object.get(); }
 
     /** Returns the object that this pointer is managing. */
     inline ObjectType& operator*() const noexcept                   { return *object; }
 
     /** Lets you access methods and properties of the object that this pointer is holding. */
-    inline ObjectType* operator->() const noexcept                  { return object; }
+    inline ObjectType* operator->() const noexcept                  { return object.get(); }
 
     //==============================================================================
     /** Removes the current object from this OptionalScopedPointer without deleting it.
@@ -118,25 +118,30 @@ public:
     /** Resets this pointer to null, possibly deleting the object that it holds, if it has
         ownership of it.
     */
-    void clear()
+    void reset()
     {
         if (! shouldDelete)
             object.release();
+        else
+            object.reset();
     }
+
+    /** Does the same thing as reset(). */
+    void clear()                                                    { reset(); }
 
     /** Makes this OptionalScopedPointer point at a new object, specifying whether the
         OptionalScopedPointer will take ownership of the object.
 
-        If takeOwnership is true, then the OptionalScopedPointer will act like a ScopedPointer,
+        If takeOwnership is true, then the OptionalScopedPointer will act like a std::unique_ptr,
         deleting the object when it is itself deleted. If this parameter is false, then the
         OptionalScopedPointer just holds a normal pointer to the object, and won't delete it.
     */
     void set (ObjectType* newObject, bool takeOwnership)
     {
-        if (object != newObject)
+        if (object.get() != newObject)
         {
-            clear();
-            object = newObject;
+            reset();
+            object.reset (newObject);
         }
 
         shouldDelete = takeOwnership;
@@ -171,14 +176,8 @@ public:
 
 private:
     //==============================================================================
-    ScopedPointer<ObjectType> object;
-    bool shouldDelete;
-
-    // This is here to avoid people accidentally taking a second owned copy of
-    // a scoped pointer, which is almost certainly not what you intended to do!
-    // If you hit a problem with this, you probably meant to say
-    //  myPointer.setOwned (myScopedPointer.release())
-    void setOwned (const ScopedPointer<ObjectType>&) JUCE_DELETED_FUNCTION;
+    std::unique_ptr<ObjectType> object;
+    bool shouldDelete = false;
 };
 
 } // namespace juce

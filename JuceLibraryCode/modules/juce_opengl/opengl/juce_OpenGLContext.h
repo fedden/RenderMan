@@ -44,6 +44,8 @@ class OpenGLTexture;
     stop and the native resources to be freed safely.
 
     @see OpenGLRenderer
+
+    @tags{OpenGL}
 */
 class JUCE_API  OpenGLContext
 {
@@ -246,7 +248,7 @@ public:
         This function can only be called if the context is attached to a component.
         Otherwise, this function will assert.
 
-        This function is useful when you need to excute house-keeping tasks such
+        This function is useful when you need to execute house-keeping tasks such
         as allocating, deallocating textures or framebuffers. As such, the functor
         will execute without locking the message thread. Therefore, it is not
         intended for any drawing commands or GUI code. Any GUI code should be
@@ -258,7 +260,7 @@ public:
     //==============================================================================
     /** Returns the scale factor used by the display that is being rendered.
 
-        The scale is that of the display - see Desktop::Displays::Display::scale
+        The scale is that of the display - see Displays::Display::scale
 
         Note that this should only be called during an OpenGLRenderer::renderOpenGL()
         callback - at other times the value it returns is undefined.
@@ -271,7 +273,7 @@ public:
     */
     unsigned int getFrameBufferID() const noexcept;
 
-    /** Returns an OS-dependent handle to some kind of underlting OS-provided GL context.
+    /** Returns an OS-dependent handle to some kind of underlying OS-provided GL context.
 
         The exact type of the value returned will depend on the OS and may change
         if the implementation changes. If you want to use this, digging around in the
@@ -321,7 +323,7 @@ private:
     NativeContext* nativeContext = nullptr;
     OpenGLRenderer* renderer = nullptr;
     double currentRenderScale = 1.0;
-    ScopedPointer<Attachment> attachment;
+    std::unique_ptr<Attachment> attachment;
     OpenGLPixelFormat openGLPixelFormat;
     void* contextToShareWith = nullptr;
     OpenGLVersion versionRequired = defaultGLVersion;
@@ -332,9 +334,9 @@ private:
     //==============================================================================
     struct AsyncWorker  : public ReferenceCountedObject
     {
-        typedef ReferenceCountedObjectPtr<AsyncWorker> Ptr;
+        using Ptr = ReferenceCountedObjectPtr<AsyncWorker>;
         virtual void operator() (OpenGLContext&) = 0;
-        virtual ~AsyncWorker() {}
+        ~AsyncWorker() override = default;
     };
 
     template <typename FunctionType>
@@ -346,10 +348,6 @@ private:
 
         JUCE_DECLARE_NON_COPYABLE (AsyncWorkerFunctor)
     };
-
-    //==============================================================================
-    friend void componentPeerAboutToChange (Component&, bool);
-    void overrideCanBeAttached (bool);
 
     //==============================================================================
     CachedImage* getCachedImage() const noexcept;

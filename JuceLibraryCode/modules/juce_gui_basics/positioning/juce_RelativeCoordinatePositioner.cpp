@@ -31,9 +31,6 @@ struct MarkerListScope  : public Expression::Scope
 {
     MarkerListScope (Component& comp) : component (comp) {}
 
-    // Suppress a VS2013 compiler warning
-    MarkerListScope& operator= (const MarkerListScope&) = delete;
-
     Expression getSymbolValue (const String& symbol) const override
     {
         switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
@@ -73,17 +70,26 @@ struct MarkerListScope  : public Expression::Scope
     static const MarkerList::Marker* findMarker (Component& component, const String& name, MarkerList*& list)
     {
         const MarkerList::Marker* marker = nullptr;
-        list = component.getMarkers (true);
 
-        if (list != nullptr)
-            marker = list->getMarker (name);
+        auto* mlh = dynamic_cast<MarkerList::MarkerListHolder*> (&component);
 
-        if (marker == nullptr)
+        if (mlh != nullptr)
         {
-            list = component.getMarkers (false);
+            list = mlh->getMarkers (true);
 
             if (list != nullptr)
                 marker = list->getMarker (name);
+        }
+
+        if (marker == nullptr)
+        {
+            if (mlh != nullptr)
+            {
+                list = mlh->getMarkers (false);
+
+                if (list != nullptr)
+                    marker = list->getMarker (name);
+            }
         }
 
         return marker;
@@ -117,7 +123,7 @@ Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (con
     {
         MarkerList* list;
 
-        if (const MarkerList::Marker* const marker = MarkerListScope::findMarker (*parent, symbol, list))
+        if (auto* marker = MarkerListScope::findMarker (*parent, symbol, list))
         {
             MarkerListScope scope (*parent);
             return Expression (marker->position.getExpression().evaluate (scope));
@@ -175,7 +181,7 @@ public:
                 break;
 
             default:
-                if (Component* const parent = component.getParentComponent())
+                if (auto* parent = component.getParentComponent())
                 {
                     MarkerList* list;
 
@@ -186,8 +192,12 @@ public:
                     else
                     {
                         // The marker we want doesn't exist, so watch all lists in case they change and the marker appears later..
-                        positioner.registerMarkerListListener (parent->getMarkers (true));
-                        positioner.registerMarkerListListener (parent->getMarkers (false));
+                        if (auto* mlh = dynamic_cast<MarkerList::MarkerListHolder*> (parent))
+                        {
+                            positioner.registerMarkerListListener (mlh->getMarkers (true));
+                            positioner.registerMarkerListListener (mlh->getMarkers (false));
+                        }
+
                         ok = false;
                     }
                 }

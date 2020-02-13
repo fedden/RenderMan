@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+
 /*******************************************************************************
  The block below describes the properties of this module, and is read by
  the Projucer to automatically generate project code that uses it.
@@ -33,18 +34,18 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:               juce_graphics
-  vendor:           juce
-  version:          5.2.0
-  name:             JUCE graphics classes
-  description:      Classes for 2D vector graphics, image loading/saving, font handling, etc.
-  website:          http://www.juce.com/juce
-  license:          GPL/Commercial
+  ID:                 juce_graphics
+  vendor:             juce
+  version:            5.4.7
+  name:               JUCE graphics classes
+  description:        Classes for 2D vector graphics, image loading/saving, font handling, etc.
+  website:            http://www.juce.com/juce
+  license:            GPL/Commercial
 
-  dependencies:     juce_events
-  OSXFrameworks:    Cocoa QuartzCore
-  iOSFrameworks:    CoreGraphics CoreImage CoreText QuartzCore
-  linuxPackages:    x11 xinerama xext freetype2
+  dependencies:       juce_events
+  OSXFrameworks:      Cocoa QuartzCore
+  iOSFrameworks:      CoreGraphics CoreImage CoreText QuartzCore
+  linuxPackages:      x11 xinerama xext freetype2
 
  END_JUCE_MODULE_DECLARATION
 
@@ -77,6 +78,15 @@
  #define JUCE_USE_DIRECTWRITE 1
 #endif
 
+/** Config: JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING
+
+    Setting this flag will turn off CoreGraphics font smoothing, which some people
+    find makes the text too 'fat' for their taste.
+*/
+#ifndef JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING
+ #define JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING 0
+#endif
+
 #ifndef JUCE_INCLUDE_PNGLIB_CODE
  #define JUCE_INCLUDE_PNGLIB_CODE 1
 #endif
@@ -105,6 +115,7 @@ namespace juce
 #include "geometry/juce_Point.h"
 #include "geometry/juce_Line.h"
 #include "geometry/juce_Rectangle.h"
+#include "geometry/juce_Parallelogram.h"
 #include "placement/juce_Justification.h"
 #include "geometry/juce_Path.h"
 #include "geometry/juce_RectangleList.h"

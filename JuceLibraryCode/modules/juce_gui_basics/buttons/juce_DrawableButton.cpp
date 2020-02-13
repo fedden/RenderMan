@@ -37,9 +37,12 @@ DrawableButton::~DrawableButton()
 }
 
 //==============================================================================
-static Drawable* copyDrawableIfNotNull (const Drawable* const d)
+static std::unique_ptr<Drawable> copyDrawableIfNotNull (const Drawable* const d)
 {
-    return d != nullptr ? d->createCopy() : nullptr;
+    if (d != nullptr)
+        return d->createCopy();
+
+    return {};
 }
 
 void DrawableButton::setImages (const Drawable* normal,
@@ -61,7 +64,8 @@ void DrawableButton::setImages (const Drawable* normal,
     overImageOn     = copyDrawableIfNotNull (overOn);
     downImageOn     = copyDrawableIfNotNull (downOn);
     disabledImageOn = copyDrawableIfNotNull (disabledOn);
-    currentImage    = nullptr;
+
+    currentImage = nullptr;
 
     buttonStateChanged();
 }
@@ -92,7 +96,7 @@ Rectangle<float> DrawableButton::getImageBounds() const
         auto indentX = jmin (edgeIndent, proportionOfWidth  (0.3f));
         auto indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
 
-        if (style == ImageOnButtonBackground)
+        if (shouldDrawButtonBackground())
         {
             indentX = jmax (getWidth()  / 4, indentX);
             indentY = jmax (getHeight() / 4, indentY);
@@ -114,12 +118,24 @@ void DrawableButton::resized()
 
     if (currentImage != nullptr)
     {
-        if (style == ImageRaw)
-            currentImage->setOriginWithOriginalSize (Point<float>());
-        else
-            currentImage->setTransformToFit (getImageBounds(),
-                                             style == ImageStretched ? RectanglePlacement::stretchToFit
-                                                                     : RectanglePlacement::centred);
+        if (style != ImageRaw)
+        {
+            int transformFlags = 0;
+
+            if (style == ImageStretched)
+            {
+                transformFlags |= RectanglePlacement::stretchToFit;
+            }
+            else
+            {
+                transformFlags |= RectanglePlacement::centred;
+
+                if (style == ImageOnButtonBackgroundOriginalSize)
+                    transformFlags |= RectanglePlacement::doNotResize;
+            }
+
+            currentImage->setTransformToFit (getImageBounds(), transformFlags);
+        }
     }
 }
 
@@ -136,8 +152,8 @@ void DrawableButton::buttonStateChanged()
     }
     else
     {
-        imageToDraw = getToggleState() ? disabledImageOn
-                                       : disabledImage;
+        imageToDraw = getToggleState() ? disabledImageOn.get()
+                                       : disabledImage.get();
 
         if (imageToDraw == nullptr)
         {
@@ -175,18 +191,18 @@ void DrawableButton::colourChanged()
 }
 
 void DrawableButton::paintButton (Graphics& g,
-                                  const bool isMouseOverButton,
-                                  const bool isButtonDown)
+                                  const bool shouldDrawButtonAsHighlighted,
+                                  const bool shouldDrawButtonAsDown)
 {
     auto& lf = getLookAndFeel();
 
-    if (style == ImageOnButtonBackground)
+    if (shouldDrawButtonBackground())
         lf.drawButtonBackground (g, *this,
                                  findColour (getToggleState() ? TextButton::buttonOnColourId
                                                               : TextButton::buttonColourId),
-                                 isMouseOverButton, isButtonDown);
+                                 shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
     else
-        lf.drawDrawableButton (g, *this, isMouseOverButton, isButtonDown);
+        lf.drawDrawableButton (g, *this, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
 }
 
 //==============================================================================
@@ -200,19 +216,19 @@ Drawable* DrawableButton::getCurrentImage() const noexcept
 
 Drawable* DrawableButton::getNormalImage() const noexcept
 {
-    return (getToggleState() && normalImageOn != nullptr) ? normalImageOn
-                                                          : normalImage;
+    return (getToggleState() && normalImageOn != nullptr) ? normalImageOn.get()
+                                                          : normalImage.get();
 }
 
 Drawable* DrawableButton::getOverImage() const noexcept
 {
     if (getToggleState())
     {
-        if (overImageOn   != nullptr)   return overImageOn;
-        if (normalImageOn != nullptr)   return normalImageOn;
+        if (overImageOn   != nullptr)   return overImageOn.get();
+        if (normalImageOn != nullptr)   return normalImageOn.get();
     }
 
-    return overImage != nullptr ? overImage : normalImage;
+    return overImage != nullptr ? overImage.get() : normalImage.get();
 }
 
 Drawable* DrawableButton::getDownImage() const noexcept
