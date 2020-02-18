@@ -27,15 +27,18 @@
 namespace juce
 {
 
+#if JUCE_MINGW
+ JUCE_DECLARE_UUID_GETTER (IOleClientSite,           "00000118-0000-0000-c000-000000000046")
+ JUCE_DECLARE_UUID_GETTER (IDispatch,                "00020400-0000-0000-c000-000000000046")
+
+ #ifndef WebBrowser
+  class WebBrowser;
+ #endif
+#endif
+
 JUCE_DECLARE_UUID_GETTER (DWebBrowserEvents2,        "34A715A0-6587-11D0-924A-0020AFC7AC4D")
 JUCE_DECLARE_UUID_GETTER (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00AA00341D07")
 JUCE_DECLARE_UUID_GETTER (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
-
-#if JUCE_MINGW
- #define DISPID_NAVIGATEERROR 271
- class WebBrowser;
-#endif
-
 JUCE_DECLARE_UUID_GETTER (WebBrowser,                "8856F961-340A-11D0-A96B-00C04FD705A2")
 
 class WebBrowserComponent::Pimpl   : public ActiveXControlComponent
@@ -84,8 +87,6 @@ public:
     {
         if (browser != nullptr)
         {
-            LPSAFEARRAY sa = nullptr;
-
             VARIANT headerFlags, frame, postDataVar, headersVar;  // (_variant_t isn't available in all compilers)
             VariantInit (&headerFlags);
             VariantInit (&frame);
@@ -100,7 +101,7 @@ public:
 
             if (postData != nullptr && postData->getSize() > 0)
             {
-                sa = SafeArrayCreateVector (VT_UI1, 0, (ULONG) postData->getSize());
+                auto sa = SafeArrayCreateVector (VT_UI1, 0, (ULONG) postData->getSize());
 
                 if (sa != nullptr)
                 {
@@ -118,7 +119,12 @@ public:
                         V_VT (&postDataVar2) = VT_ARRAY | VT_UI1;
                         V_ARRAY (&postDataVar2) = sa;
 
+                        sa = nullptr;
                         postDataVar = postDataVar2;
+                    }
+                    else
+                    {
+                        SafeArrayDestroy (sa);
                     }
                 }
             }
@@ -126,9 +132,6 @@ public:
             auto urlBSTR = SysAllocString ((const OLECHAR*) url.toWideCharPointer());
             browser->Navigate (urlBSTR, &headerFlags, &frame, &postDataVar, &headersVar);
             SysFreeString (urlBSTR);
-
-            if (sa != nullptr)
-                SafeArrayDestroy (sa);
 
             VariantClear (&headerFlags);
             VariantClear (&frame);
@@ -150,12 +153,12 @@ private:
     {
         EventHandler (WebBrowserComponent& w)  : ComponentMovementWatcher (&w), owner (w) {}
 
-        JUCE_COMRESULT GetTypeInfoCount (UINT*)                                  { return E_NOTIMPL; }
-        JUCE_COMRESULT GetTypeInfo (UINT, LCID, ITypeInfo**)                     { return E_NOTIMPL; }
-        JUCE_COMRESULT GetIDsOfNames (REFIID, LPOLESTR*, UINT, LCID, DISPID*)    { return E_NOTIMPL; }
+        JUCE_COMRESULT GetTypeInfoCount (UINT*) override                                 { return E_NOTIMPL; }
+        JUCE_COMRESULT GetTypeInfo (UINT, LCID, ITypeInfo**) override                    { return E_NOTIMPL; }
+        JUCE_COMRESULT GetIDsOfNames (REFIID, LPOLESTR*, UINT, LCID, DISPID*) override   { return E_NOTIMPL; }
 
         JUCE_COMRESULT Invoke (DISPID dispIdMember, REFIID /*riid*/, LCID /*lcid*/, WORD /*wFlags*/, DISPPARAMS* pDispParams,
-                               VARIANT* /*pVarResult*/, EXCEPINFO* /*pExcepInfo*/, UINT* /*puArgErr*/)
+                               VARIANT* /*pVarResult*/, EXCEPINFO* /*pExcepInfo*/, UINT* /*puArgErr*/) override
         {
             if (dispIdMember == DISPID_BEFORENAVIGATE2)
             {
@@ -178,13 +181,13 @@ private:
                 return S_OK;
             }
 
-            if (dispIdMember == DISPID_NAVIGATEERROR)
+            if (dispIdMember == 271 /*DISPID_NAVIGATEERROR*/)
             {
                 int statusCode = pDispParams->rgvarg[1].pvarVal->intVal;
                 *pDispParams->rgvarg[0].pboolVal = VARIANT_FALSE;
 
                 // IWebBrowser2 also reports http status codes here, we need
-                // report only network erros
+                // report only network errors
                 if (statusCode < 0)
                 {
                     LPTSTR messageBuffer = nullptr;
@@ -238,17 +241,16 @@ private:
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
-    : browser (nullptr),
+    : browser (new Pimpl()),
       blankPageShown (false),
       unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
     setOpaque (true);
-    addAndMakeVisible (browser = new Pimpl());
+    addAndMakeVisible (browser.get());
 }
 
 WebBrowserComponent::~WebBrowserComponent()
 {
-    delete browser;
 }
 
 //==============================================================================
@@ -396,35 +398,29 @@ void WebBrowserComponent::focusGained (FocusChangeType)
 
 void WebBrowserComponent::clearCookies()
 {
-    HeapBlock<::INTERNET_CACHE_ENTRY_INFO> entry;
-    ::DWORD entrySize = sizeof (::INTERNET_CACHE_ENTRY_INFO);
-
-   #if JUCE_MINGW
-    const auto searchPattern = "cookie:";
-   #else
-    const auto searchPattern = TEXT ("cookie:");
-   #endif
-    ::HANDLE urlCacheHandle = ::FindFirstUrlCacheEntry (searchPattern, entry.getData(), &entrySize);
+    HeapBlock<::INTERNET_CACHE_ENTRY_INFOA> entry;
+    ::DWORD entrySize = sizeof (::INTERNET_CACHE_ENTRY_INFOA);
+    ::HANDLE urlCacheHandle = ::FindFirstUrlCacheEntryA ("cookie:", entry.getData(), &entrySize);
 
     if (urlCacheHandle == nullptr && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
     {
         entry.realloc (1, entrySize);
-        urlCacheHandle = ::FindFirstUrlCacheEntry (searchPattern, entry.getData(), &entrySize);
+        urlCacheHandle = ::FindFirstUrlCacheEntryA ("cookie:", entry.getData(), &entrySize);
     }
 
     if (urlCacheHandle != nullptr)
     {
         for (;;)
         {
-            ::DeleteUrlCacheEntry (entry.getData()->lpszSourceUrlName);
+            ::DeleteUrlCacheEntryA (entry.getData()->lpszSourceUrlName);
 
-            if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) == 0)
+            if (::FindNextUrlCacheEntryA (urlCacheHandle, entry.getData(), &entrySize) == 0)
             {
                 if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
                 {
                     entry.realloc (1, entrySize);
 
-                    if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) != 0)
+                    if (::FindNextUrlCacheEntryA (urlCacheHandle, entry.getData(), &entrySize) != 0)
                         continue;
                 }
 

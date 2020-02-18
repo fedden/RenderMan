@@ -108,9 +108,14 @@ namespace wrap
     class RenderEngineWrapper : public RenderEngine
     {
     public:
+
         RenderEngineWrapper (int sr, int bs, int ffts) :
             RenderEngine (sr, bs, ffts)
         { }
+
+		RenderEngineWrapper(const RenderEngineWrapper&) {
+
+		}
 
         void wrapperSetPatch (boost::python::list listOfTuples)
         {

@@ -29,6 +29,8 @@ namespace juce
 
     This can enumerate the items in a ZIP file and can create suitable stream objects
     to read each one.
+
+    @tags{Core}
 */
 class JUCE_API  ZipFile
 {
@@ -77,6 +79,15 @@ public:
 
         /** The last time the file was modified. */
         Time fileTime;
+
+        /** True if the zip entry is a symbolic link. */
+        bool isSymbolicLink;
+
+        /** Platform specific data. Depending on how the zip file was created this
+            may contain macOS and Linux file types, permissions and
+            setuid/setgid/sticky bits.
+        */
+        uint32 externalFileAttributes;
     };
 
     //==============================================================================
@@ -219,7 +230,6 @@ public:
         //==============================================================================
     private:
         struct Item;
-        friend struct ContainerDeletePolicy<Item>;
         OwnedArray<Item> items;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Builder)
@@ -233,13 +243,13 @@ private:
     OwnedArray<ZipEntryHolder> entries;
     CriticalSection lock;
     InputStream* inputStream = nullptr;
-    ScopedPointer<InputStream> streamToDelete;
-    ScopedPointer<InputSource> inputSource;
+    std::unique_ptr<InputStream> streamToDelete;
+    std::unique_ptr<InputSource> inputSource;
 
    #if JUCE_DEBUG
     struct OpenStreamCounter
     {
-        OpenStreamCounter() {}
+        OpenStreamCounter() = default;
         ~OpenStreamCounter();
 
         int numOpenStreams = 0;

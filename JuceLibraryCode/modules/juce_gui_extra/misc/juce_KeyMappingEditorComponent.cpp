@@ -30,8 +30,8 @@ namespace juce
 class KeyMappingEditorComponent::ChangeKeyButton  : public Button
 {
 public:
-    ChangeKeyButton (KeyMappingEditorComponent& kec, const CommandID command,
-                     const String& keyName, const int keyIndex)
+    ChangeKeyButton (KeyMappingEditorComponent& kec, CommandID command,
+                     const String& keyName, int keyIndex)
         : Button (keyName),
           owner (kec),
           commandID (command),
@@ -50,37 +50,39 @@ public:
                                                  keyNum >= 0 ? getName() : String());
     }
 
-    static void menuCallback (int result, ChangeKeyButton* button)
-    {
-        if (button != nullptr)
-        {
-            switch (result)
-            {
-                case 1: button->assignNewKey(); break;
-                case 2: button->owner.getMappings().removeKeyPress (button->commandID, button->keyNum); break;
-                default: break;
-            }
-        }
-    }
-
     void clicked() override
     {
         if (keyNum >= 0)
         {
-            // existing key clicked..
+            Component::SafePointer<ChangeKeyButton> button (this);
             PopupMenu m;
-            m.addItem (1, TRANS("Change this key-mapping"));
-            m.addSeparator();
-            m.addItem (2, TRANS("Remove this key-mapping"));
 
-            m.showMenuAsync (PopupMenu::Options(),
-                             ModalCallbackFunction::forComponent (menuCallback, this));
+            m.addItem (TRANS("Change this key-mapping"),
+                       [button]
+                       {
+                           if (button != nullptr)
+                               button.getComponent()->assignNewKey();
+                       });
+
+            m.addSeparator();
+
+            m.addItem (TRANS("Remove this key-mapping"),
+                       [button]
+                       {
+                           if (button != nullptr)
+                               button->owner.getMappings().removeKeyPress (button->commandID,
+                                                                           button->keyNum);
+                       });
+
+            m.showMenuAsync (PopupMenu::Options().withTargetComponent (this));
         }
         else
         {
             assignNewKey();  // + button pressed..
         }
     }
+
+    using Button::clicked;
 
     void fitToContent (const int h) noexcept
     {
@@ -189,13 +191,13 @@ public:
                 button->setNewKey (button->currentKeyEntryWindow->lastPress, false);
             }
 
-            button->currentKeyEntryWindow = nullptr;
+            button->currentKeyEntryWindow.reset();
         }
     }
 
     void assignNewKey()
     {
-        currentKeyEntryWindow = new KeyEntryWindow (owner);
+        currentKeyEntryWindow.reset (new KeyEntryWindow (owner));
         currentKeyEntryWindow->enterModalState (true, ModalCallbackFunction::forComponent (keyChosen, this));
     }
 
@@ -203,7 +205,7 @@ private:
     KeyMappingEditorComponent& owner;
     const CommandID commandID;
     const int keyNum;
-    ScopedPointer<KeyEntryWindow> currentKeyEntryWindow;
+    std::unique_ptr<KeyEntryWindow> currentKeyEntryWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChangeKeyButton)
 };
@@ -336,7 +338,6 @@ private:
 
 //==============================================================================
 class KeyMappingEditorComponent::TopLevelItem   : public TreeViewItem,
-                                                  public Button::Listener,
                                                   private ChangeListener
 {
 public:
@@ -346,7 +347,7 @@ public:
         owner.getMappings().addChangeListener (this);
     }
 
-    ~TopLevelItem()
+    ~TopLevelItem() override
     {
         owner.getMappings().removeChangeListener (this);
     }
@@ -372,27 +373,15 @@ public:
         }
     }
 
-    static void resetToDefaultsCallback (int result, KeyMappingEditorComponent* owner)
-    {
-        if (result != 0 && owner != nullptr)
-            owner->getMappings().resetToDefaultMappings();
-    }
-
-    void buttonClicked (Button*) override
-    {
-        AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
-                                      TRANS("Reset to defaults"),
-                                      TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
-                                      TRANS("Reset"),
-                                      String(),
-                                      &owner,
-                                      ModalCallbackFunction::forComponent (resetToDefaultsCallback, &owner));
-    }
-
 private:
     KeyMappingEditorComponent& owner;
 };
 
+static void resetKeyMappingsToDefaultsCallback (int result, KeyMappingEditorComponent* owner)
+{
+    if (result != 0 && owner != nullptr)
+        owner->getMappings().resetToDefaultMappings();
+}
 
 //==============================================================================
 KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappingManager,
@@ -400,19 +389,28 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     : mappings (mappingManager),
       resetButton (TRANS ("reset to defaults"))
 {
-    treeItem = new TopLevelItem (*this);
+    treeItem.reset (new TopLevelItem (*this));
 
     if (showResetToDefaultButton)
     {
         addAndMakeVisible (resetButton);
-        resetButton.addListener (treeItem);
+
+        resetButton.onClick = [this]
+        {
+            AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
+                                          TRANS("Reset to defaults"),
+                                          TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
+                                          TRANS("Reset"),
+                                          {}, this,
+                                          ModalCallbackFunction::forComponent (resetKeyMappingsToDefaultsCallback, this));
+        };
     }
 
     addAndMakeVisible (tree);
     tree.setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);
-    tree.setRootItem (treeItem);
+    tree.setRootItem (treeItem.get());
     tree.setIndentSize (12);
 }
 

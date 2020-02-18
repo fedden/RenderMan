@@ -28,41 +28,59 @@ XmlDocument::XmlDocument (const File& file)  : inputSource (new FileInputSource 
 
 XmlDocument::~XmlDocument() {}
 
-XmlElement* XmlDocument::parse (const File& file)
+std::unique_ptr<XmlElement> XmlDocument::parse (const File& file)
 {
-    XmlDocument doc (file);
-    return doc.getDocumentElement();
+    return XmlDocument (file).getDocumentElement();
 }
 
-XmlElement* XmlDocument::parse (const String& xmlData)
+std::unique_ptr<XmlElement> XmlDocument::parse (const String& textToParse)
 {
-    XmlDocument doc (xmlData);
-    return doc.getDocumentElement();
+    return XmlDocument (textToParse).getDocumentElement();
 }
 
-void XmlDocument::setInputSource (InputSource* const newSource) noexcept
+std::unique_ptr<XmlElement> parseXML (const String& textToParse)
 {
-    inputSource = newSource;
+    return XmlDocument (textToParse).getDocumentElement();
 }
 
-void XmlDocument::setEmptyTextElementsIgnored (const bool shouldBeIgnored) noexcept
+std::unique_ptr<XmlElement> parseXML (const File& file)
+{
+    return XmlDocument (file).getDocumentElement();
+}
+
+std::unique_ptr<XmlElement> parseXMLIfTagMatches (const String& textToParse, StringRef requiredTag)
+{
+    return XmlDocument (textToParse).getDocumentElementIfTagMatches (requiredTag);
+}
+
+std::unique_ptr<XmlElement> parseXMLIfTagMatches (const File& file, StringRef requiredTag)
+{
+    return XmlDocument (file).getDocumentElementIfTagMatches (requiredTag);
+}
+
+void XmlDocument::setInputSource (InputSource* newSource) noexcept
+{
+    inputSource.reset (newSource);
+}
+
+void XmlDocument::setEmptyTextElementsIgnored (bool shouldBeIgnored) noexcept
 {
     ignoreEmptyTextElements = shouldBeIgnored;
 }
 
 namespace XmlIdentifierChars
 {
-    static bool isIdentifierCharSlow (const juce_wchar c) noexcept
+    static bool isIdentifierCharSlow (juce_wchar c) noexcept
     {
         return CharacterFunctions::isLetterOrDigit (c)
                  || c == '_' || c == '-' || c == ':' || c == '.';
     }
 
-    static bool isIdentifierChar (const juce_wchar c) noexcept
+    static bool isIdentifierChar (juce_wchar c) noexcept
     {
         static const uint32 legalChars[] = { 0, 0x7ff6000, 0x87fffffe, 0x7fffffe, 0 };
 
-        return ((int) c < (int) numElementsInArray (legalChars) * 32) ? ((legalChars [c >> 5] & (1 << (c & 31))) != 0)
+        return ((int) c < (int) numElementsInArray (legalChars) * 32) ? ((legalChars [c >> 5] & (uint32) (1 << (c & 31))) != 0)
                                                                       : isIdentifierCharSlow (c);
     }
 
@@ -89,11 +107,13 @@ namespace XmlIdentifierChars
     }
 }
 
-XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentElement)
+std::unique_ptr<XmlElement> XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentElement)
 {
     if (originalText.isEmpty() && inputSource != nullptr)
     {
-        if (ScopedPointer<InputStream> in = inputSource->createInputStream())
+        std::unique_ptr<InputStream> in (inputSource->createInputStream());
+
+        if (in != nullptr)
         {
             MemoryOutputStream data;
             data.writeFromInputStream (*in, onlyReadOuterDocumentElement ? 8192 : -1);
@@ -127,6 +147,15 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
     return parseDocumentElement (originalText.getCharPointer(), onlyReadOuterDocumentElement);
 }
 
+std::unique_ptr<XmlElement> XmlDocument::getDocumentElementIfTagMatches (StringRef requiredTag)
+{
+    if (auto xml = getDocumentElement (true))
+        if (xml->hasTagName (requiredTag))
+            return getDocumentElement (false);
+
+    return {};
+}
+
 const String& XmlDocument::getLastParseError() const noexcept
 {
     return lastError;
@@ -141,8 +170,12 @@ void XmlDocument::setLastError (const String& desc, const bool carryOn)
 String XmlDocument::getFileContents (const String& filename) const
 {
     if (inputSource != nullptr)
-        if (ScopedPointer<InputStream> in = inputSource->createInputStreamFor (filename.trim().unquoted()))
+    {
+        std::unique_ptr<InputStream> in (inputSource->createInputStreamFor (filename.trim().unquoted()));
+
+        if (in != nullptr)
             return in->readEntireStreamAsString();
+    }
 
     return {};
 }
@@ -160,8 +193,8 @@ juce_wchar XmlDocument::readNextChar() noexcept
     return c;
 }
 
-XmlElement* XmlDocument::parseDocumentElement (String::CharPointerType textToParse,
-                                               const bool onlyReadOuterDocumentElement)
+std::unique_ptr<XmlElement> XmlDocument::parseDocumentElement (String::CharPointerType textToParse,
+                                                               bool onlyReadOuterDocumentElement)
 {
     input = textToParse;
     errorOccurred = false;
@@ -183,13 +216,13 @@ XmlElement* XmlDocument::parseDocumentElement (String::CharPointerType textToPar
     else
     {
         lastError.clear();
-        ScopedPointer<XmlElement> result (readNextElement (! onlyReadOuterDocumentElement));
+        std::unique_ptr<XmlElement> result (readNextElement (! onlyReadOuterDocumentElement));
 
         if (! errorOccurred)
-            return result.release();
+            return result;
     }
 
-    return nullptr;
+    return {};
 }
 
 bool XmlDocument::parseHeader()

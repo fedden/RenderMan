@@ -29,9 +29,9 @@ typedef std::vector<std::array<double, 13>> MFCCFeatures;
 class RenderEngine
 {
 public:
-    RenderEngine (int sr,
-                  int bs,
-                  int ffts) :
+    RenderEngine (int sr=44100,
+                  int bs=512,
+                  int ffts=512) :
         sampleRate(sr),
         bufferSize(bs),
         fftSize(ffts),
@@ -42,12 +42,14 @@ public:
 
     virtual ~RenderEngine()
     {
-        if (plugin != nullptr)
+        if (plugin)
         {
             plugin->releaseResources();
-            delete plugin;
+			plugin.release();
         }
     }
+
+	RenderEngine(RenderEngine&) = default;
 
 
     bool loadPlugin (const std::string& path);
@@ -100,13 +102,13 @@ private:
     int                  bufferSize;
     int                  fftSize;
     maxiMFCC             mfcc;
-    AudioPluginInstance* plugin;
+	std::unique_ptr<juce::AudioPluginInstance, std::default_delete<juce::AudioPluginInstance>> plugin;
     PluginPatch          pluginParameters;
     PluginPatch          overridenParameters;
     MFCCFeatures         mfccFeatures;
     std::vector<double>  processedMonoAudioPreview;
     std::vector<double>  rmsFrames;
-    double               currentRmsFrame;
+    double               currentRmsFrame = 0;
 };
 
 

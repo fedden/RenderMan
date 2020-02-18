@@ -496,8 +496,8 @@ struct MP3Frame
 
         mpeg25              = (header & (1 << 20)) == 0;
         lsf                 = mpeg25 ? 1 : ((header & (1 << 19)) ? 0 : 1);
-        layer               = 4 - ((header >> 17) & 3);
-        sampleRateIndex     = mpeg25 ? (6 + ((header >> 10) & 3)) : ((int) ((header >> 10) & 3) + (lsf * 3));
+        layer               = (int) (4 - ((header >> 17) & 3));
+        sampleRateIndex     = (int) ((header >> 10) & 3) + (mpeg25 ? 6 : (lsf * 3));
         crc16FollowsHeader  = ((header >> 16) & 1) == 0;
         bitrateIndex        = (header >> 12) & 15;
         padding             = (header >> 9) & 1;
@@ -611,7 +611,7 @@ private:
             float* costab = cosTables[i];
 
             for (int k = 0; k < kr; ++k)
-                costab[k] = (float) (1.0 / (2.0 * std::cos (double_Pi * (k * 2 + 1) / divv)));
+                costab[k] = (float) (1.0 / (2.0 * std::cos (MathConstants<double>::pi * (k * 2 + 1) / divv)));
         }
 
         for (i = 0, j = 0; i < 256; ++i, ++j, table += 32)
@@ -696,23 +696,23 @@ private:
 
         for (i = 0; i < 18; ++i)
         {
-            win[0][i]      = win[1][i]      = (float) (0.5 * std::sin (double_Pi / 72.0 * (2 * i + 1))        / std::cos (double_Pi * (2 * i + 19)        / 72.0));
-            win[0][i + 18] = win[3][i + 18] = (float) (0.5 * std::sin (double_Pi / 72.0 * (2 * (i + 18) + 1)) / std::cos (double_Pi * (2 * (i + 18) + 19) / 72.0));
+            win[0][i]      = win[1][i]      = (float) (0.5 * std::sin (MathConstants<double>::pi / 72.0 * (2 * i + 1))        / std::cos (MathConstants<double>::pi * (2 * i + 19)        / 72.0));
+            win[0][i + 18] = win[3][i + 18] = (float) (0.5 * std::sin (MathConstants<double>::pi / 72.0 * (2 * (i + 18) + 1)) / std::cos (MathConstants<double>::pi * (2 * (i + 18) + 19) / 72.0));
         }
 
-        const double piOver72 = double_Pi / 72.0;
+        const double piOver72 = MathConstants<double>::pi / 72.0;
 
         for (i = 0; i < 6; ++i)
         {
             win[1][i + 18] = (float) (0.5 / std::cos (piOver72 * (2 * (i + 18) + 19)));
             win[3][i + 12] = (float) (0.5 / std::cos (piOver72 * (2 * (i + 12) + 19)));
-            win[1][i + 24] = (float) (0.5 * std::sin (double_Pi / 24.0 * (2 * i + 13)) / std::cos (piOver72 * (2 * (i + 24) + 19)));
+            win[1][i + 24] = (float) (0.5 * std::sin (MathConstants<double>::pi / 24.0 * (2 * i + 13)) / std::cos (piOver72 * (2 * (i + 24) + 19)));
             win[1][i + 30] = win[3][i] = 0;
-            win[3][i + 6]  = (float) (0.5 * std::sin (double_Pi / 24.0 * (2 * i + 1)) / std::cos (piOver72 * (2 * (i + 6) + 19)));
+            win[3][i + 6]  = (float) (0.5 * std::sin (MathConstants<double>::pi / 24.0 * (2 * i + 1)) / std::cos (piOver72 * (2 * (i + 6) + 19)));
         }
 
         for (i = 0; i < 12; ++i)
-            win[2][i] = (float) (0.5 * std::sin (double_Pi / 24.0 * (2 * i + 1)) / std::cos (double_Pi * (2 * i + 7) / 24.0));
+            win[2][i] = (float) (0.5 * std::sin (MathConstants<double>::pi / 24.0 * (2 * i + 1)) / std::cos (MathConstants<double>::pi * (2 * i + 7) / 24.0));
 
         for (j = 0; j < 4; ++j)
         {
@@ -725,7 +725,7 @@ private:
 
         for (i = 0; i < 16; ++i)
         {
-            const double t = std::tan (i * double_Pi / 12.0);
+            const double t = std::tan (i * MathConstants<double>::pi / 12.0);
             tan1_1[i] = (float) (t / (1.0 + t));
             tan2_1[i] = (float) (1.0 / (1.0 + t));
             tan1_2[i] = (float) (sqrt2 * t / (1.0 + t));
@@ -1625,7 +1625,7 @@ private:
 
     static bool isValidHeader (uint32 header, int oldLayer) noexcept
     {
-        int newLayer = 4 - ((header >> 17) & 3);
+        auto newLayer = (int) (4 - ((header >> 17) & 3));
 
         return (header & 0xffe00000) == 0xffe00000
                 && newLayer != 4
@@ -1655,8 +1655,8 @@ private:
         if (numBits <= 0 || bufferPointer == nullptr)
             return 0;
 
-        const uint32 result = ((((((bufferPointer[0] << 8) | bufferPointer[1]) << 8)
-                               | bufferPointer[2]) << bitIndex) & 0xffffff) >> (24 - numBits);
+        const auto result = (uint32) (((((((bufferPointer[0] << 8) | bufferPointer[1]) << 8)
+                                       | bufferPointer[2]) << bitIndex) & 0xffffff) >> (24 - numBits));
         bitIndex += numBits;
         bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
@@ -1669,12 +1669,12 @@ private:
         ++bitIndex;
         bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
-        return result >> 7;
+        return (uint32) (result >> 7);
     }
 
     uint32 getBitsUnchecked (int numBits) noexcept
     {
-        const uint32 result = ((((bufferPointer[0] << 8) | bufferPointer[1]) << bitIndex) & 0xffff) >> (16 - numBits);
+        const auto result = (uint32) (((((bufferPointer[0] << 8) | bufferPointer[1]) << bitIndex) & 0xffff) >> (16 - numBits));
         bitIndex += numBits;
         bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
@@ -1912,9 +1912,10 @@ private:
             getLayer3SideInfo2 (numChannels, msStereo, sampleRate, single);
 
         int databits = 0;
+
         for (int gr = 0; gr < granules; ++gr)
             for (int ch = 0; ch < numChannels; ++ch)
-                databits += sideinfo.ch[ch].gr[gr].part2_3Length;
+                databits += (int) sideinfo.ch[ch].gr[gr].part2_3Length;
 
         return databits - 8 * (int) sideinfo.mainDataStart;
     }
@@ -1961,8 +1962,8 @@ private:
             {
                 const uint8 n0 = si.allocation[i][0];
                 const uint8 n1 = si.allocation[i][1];
-                fraction[0][i] = n0 > 0 ? (float) (((-1 << n0) + getBitsUint16 (n0 + 1) + 1) * constants.muls[n0 + 1][si.scaleFactor[i][0]]) : 0;
-                fraction[1][i] = n1 > 0 ? (float) (((-1 << n1) + getBitsUint16 (n1 + 1) + 1) * constants.muls[n1 + 1][si.scaleFactor[i][1]]) : 0;
+                fraction[0][i] = n0 > 0 ? (float) ((-(1 << n0) + getBitsUint16 (n0 + 1) + 1) * constants.muls[n0 + 1][si.scaleFactor[i][0]]) : 0;
+                fraction[1][i] = n1 > 0 ? (float) ((-(1 << n1) + getBitsUint16 (n1 + 1) + 1) * constants.muls[n1 + 1][si.scaleFactor[i][1]]) : 0;
             }
 
             for (i = jsbound; i < 32; ++i)
@@ -1971,7 +1972,7 @@ private:
 
                 if (n > 0)
                 {
-                    const uint32 w = ((uint32) (-1 << n) + getBitsUint16 (n + 1) + 1);
+                    const uint32 w = ((uint32) -(1 << n) + getBitsUint16 (n + 1) + 1);
                     fraction[0][i] = (float) (w * constants.muls[n + 1][si.scaleFactor[i][0]]);
                     fraction[1][i] = (float) (w * constants.muls[n + 1][si.scaleFactor[i][1]]);
                 }
@@ -1987,7 +1988,7 @@ private:
                 const uint8 j = si.scaleFactor[i][0];
 
                 if (n > 0)
-                    fraction[0][i] = (float) (((-1 << n) + getBitsUint16 (n + 1) + 1) * constants.muls[n + 1][j]);
+                    fraction[0][i] = (float) ((-(1 << n) + getBitsUint16 (n + 1) + 1) * constants.muls[n + 1][j]);
                 else
                     fraction[0][i] = 0;
             }
@@ -2452,7 +2453,7 @@ private:
         auto* xrpnt = (float*) xr;
         auto part2remain = (int) granule.part2_3Length - part2bits;
 
-        zeromem (xrpnt, sizeof (float) * (size_t) (&xr[32][0] - xrpnt));
+        zeromem (xrpnt, (size_t) (&xr[32][0] - xrpnt) * sizeof (float));
 
         auto bv = (int) granule.bigValues;
         auto region1 = (int) granule.region1Start;
@@ -2549,8 +2550,8 @@ private:
                     if (x == 15)
                     {
                         max[lwin] = cb;
-                        part2remain -= h->bits + 1;
-                        x += getBits ((int) h->bits);
+                        part2remain -= (int) (h->bits + 1);
+                        x += (int) getBits ((int) h->bits);
                         *xrpnt = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                     }
                     else if (x)
@@ -2567,8 +2568,8 @@ private:
                     if (y == 15)
                     {
                         max[lwin] = cb;
-                        part2remain -= h->bits + 1;
-                        y += getBits ((int) h->bits);
+                        part2remain -= (int) (h->bits + 1);
+                        y += (int) getBits ((int) h->bits);
                         *xrpnt = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                     }
                     else if (y)
@@ -2709,8 +2710,8 @@ private:
                     if (x == 15)
                     {
                         max = cb;
-                        part2remain -= h->bits + 1;
-                        x += getBits ((int) h->bits);
+                        part2remain -= (int) (h->bits + 1);
+                        x += (int) getBits ((int) h->bits);
                         *xrpnt++ = constants.nToThe4Over3[x] * (getOneBit() ? -v : v);
                     }
                     else if (x)
@@ -2725,8 +2726,8 @@ private:
                     if (y == 15)
                     {
                         max = cb;
-                        part2remain -= h->bits + 1;
-                        y += getBits ((int) h->bits);
+                        part2remain -= (int) (h->bits + 1);
+                        y += (int) getBits ((int) h->bits);
                         *xrpnt++ = constants.nToThe4Over3[y] * (getOneBit() ? -v : v);
                     }
                     else if (y)
@@ -2788,7 +2789,7 @@ private:
                 }
             }
 
-            zeromem (xrpnt, sizeof (float) * (size_t) (&xr[32][0] - xrpnt));
+            zeromem (xrpnt, (size_t) (&xr[32][0] - xrpnt) * sizeof (float));
 
             granule.maxBandl = (uint32) (max + 1);
             granule.maxb = (uint32) constants.longLimit[sampleRate][granule.maxBandl];
@@ -3006,17 +3007,17 @@ public:
             {
                 for (int i = numDestChannels; --i >= 0;)
                     if (destSamples[i] != nullptr)
-                        zeromem (destSamples[i] + startOffsetInDestBuffer, sizeof (float) * (size_t) numSamples);
+                        zeromem (destSamples[i] + startOffsetInDestBuffer, (size_t) numSamples * sizeof (float));
 
                 return false;
             }
 
             const int numToCopy = jmin (decodedEnd - decodedStart, numSamples);
             float* const* const dst = reinterpret_cast<float**> (destSamples);
-            memcpy (dst[0] + startOffsetInDestBuffer, decoded0 + decodedStart, sizeof (float) * (size_t) numToCopy);
+            memcpy (dst[0] + startOffsetInDestBuffer, decoded0 + decodedStart, (size_t) numToCopy * sizeof (float));
 
             if (numDestChannels > 1 && dst[1] != nullptr)
-                memcpy (dst[1] + startOffsetInDestBuffer, (numChannels < 2 ? decoded0 : decoded1) + decodedStart, sizeof (float) * (size_t) numToCopy);
+                memcpy (dst[1] + startOffsetInDestBuffer, (numChannels < 2 ? decoded0 : decoded1) + decodedStart, (size_t) numToCopy * sizeof (float));
 
             startOffsetInDestBuffer += numToCopy;
             decodedStart += numToCopy;
@@ -3132,7 +3133,7 @@ StringArray MP3AudioFormat::getQualityOptions()     { return {}; }
 
 AudioFormatReader* MP3AudioFormat::createReaderFor (InputStream* sourceStream, const bool deleteStreamIfOpeningFails)
 {
-    ScopedPointer<MP3Decoder::MP3Reader> r (new MP3Decoder::MP3Reader (sourceStream));
+    std::unique_ptr<MP3Decoder::MP3Reader> r (new MP3Decoder::MP3Reader (sourceStream));
 
     if (r->lengthInSamples > 0)
         return r.release();

@@ -15,7 +15,7 @@
 
 # RenderMan
 
-Renderman is a command line VSTi host written in C++ with Python bindings using [JUCE](https://github.com/julianstorer/JUCE) and [Maximilian](https://github.com/micknoise/Maximilian) libraries for the backend. It is designed with ease of use in mind to extract audio and features from VSTi plugins. It has a fast growing list of features, including setting, getting parameters from synthesiers, setting whole patches, getting random patches, obtaining MFCCS, FFT, audio data and much more.
+Renderman is a command line VSTi host written in C++ with Python bindings using [JUCE 5.4.7](https://github.com/julianstorer/JUCE) and [Maximilian](https://github.com/micknoise/Maximilian) libraries for the backend. It is designed with ease of use in mind to extract audio and features from VSTi plugins. It has a fast growing list of features, including setting, getting parameters from synthesiers, setting whole patches, getting random patches, obtaining MFCCS, FFT, audio data and much more.
 
 A usage example in the form of an IPython notebook can be found [here](http://doc.gold.ac.uk/~lfedd001/renderman.html).
 
@@ -109,8 +109,22 @@ make
 ```
 
 ### Windows
+Install [Boost 1.71.0-msvc-14.2-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.71.0/boost_1_71_0-msvc-14.2-64.exe/download) and move it to `C:/tools/boost_1_71_0`. It'll take up at least 2 GB.
 
-Windows isn't ready yet, but is in my to-do list. Patches, errors and notes are very welcome here!
+Install [Python 3.7.x](https://www.python.org/downloads/release/python-375/) to `C:/Python37`. Use [virtualenv](https://docs.python-guide.org/dev/virtualenvs/) to create a virtual environment located at `C:/Python37renderman` (i.e., `virtualenv C:/Python37renderman --python=C:/Python37/python.exe`)
+
+Use Projucer to build the Visual Studio 2019 solution in Release mode. Note the post-build command, which does a few things:
+
+1. Create the folder `C:/Python37renderman/DLLs`.
+2. Move the recently built librenderman.dll to this folder.
+3. Move the necessary Boost DLLs to this folder.
+
+Now you can activate the virtual environment and import renderman:
+
+    C:/Python37renderman/Scripts/activate.bat
+    python
+    >> import librenderman as rm
+    >> engine = rm.RenderEngine(44100,512,512)
 
 ## Does It Work?
 

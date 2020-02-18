@@ -35,7 +35,7 @@ namespace juce
     Each MouseEvent object contains a reference to the MouseInputSource that generated
     it. In an environment with a single mouse for input, all events will come from the
     same source, but in a multi-touch system, there may be multiple MouseInputSource
-    obects active, each representing a stream of events coming from a particular finger.
+    objects active, each representing a stream of events coming from a particular finger.
 
     Events coming from a single MouseInputSource are always sent in a fixed and predictable
     order: a mouseMove will never be called without a mouseEnter having been sent beforehand,
@@ -46,6 +46,8 @@ namespace juce
     method to find out which finger each event came from.
 
     @see MouseEvent
+
+    @tags{GUI}
 */
 class JUCE_API  MouseInputSource  final
 {
@@ -170,10 +172,12 @@ public:
     /** Returns the screen position at which the last mouse-down occurred. */
     Point<float> getLastMouseDownPosition() const noexcept;
 
-    /** Returns true if this mouse is currently down, and if it has been dragged more
-        than a couple of pixels from the place it was pressed.
-    */
-    bool hasMouseMovedSignificantlySincePressed() const noexcept;
+    /** Returns true if this input source represents a long-press or drag interaction i.e. it has been held down for a significant
+        amount of time or it has been dragged more than a couple of pixels from the place it was pressed. */
+    bool isLongPressOrDrag() const noexcept;
+
+    /** Returns true if this input source has been dragged more than a couple of pixels from the place it was pressed. */
+    bool hasMovedSignificantlySincePressed() const noexcept;
 
     /** Returns true if this input source uses a visible mouse cursor. */
     bool hasMouseCursor() const noexcept;
@@ -233,6 +237,18 @@ public:
     static const float invalidTiltX;
     static const float invalidTiltY;
 
+    /** An offscreen mouse position used when triggering mouse exits where we don't want to move
+        the cursor over an existing component.
+    */
+    static const Point<float> offscreenMousePos;
+
+   #if ! DOXYGEN
+    // This method has been deprecated and replaced with the isLongPressOrDrag() and hasMovedSignificantlySincePressed()
+    // methods. If you want the same behaviour you should use isLongPressOrDrag() which accounts for the amount of time
+    // that the input source has been held down for, but if you only want to know whether it has been moved use
+    // hasMovedSignificantlySincePressed() instead.
+    JUCE_DEPRECATED (bool hasMouseMovedSignificantlySincePressed() const noexcept);
+   #endif
 private:
     //==============================================================================
     friend class ComponentPeer;

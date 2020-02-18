@@ -33,7 +33,11 @@ bool RenderEngine::loadPlugin (const std::string& path)
 
     String errorMessage;
 
-    if (plugin != nullptr) delete plugin;
+	if (plugin)
+	{
+		plugin->releaseResources();
+		plugin.release();
+	}
 
     plugin = pluginFormatManager.createPluginInstance (*pluginDescriptions[0],
                                                        sampleRate,

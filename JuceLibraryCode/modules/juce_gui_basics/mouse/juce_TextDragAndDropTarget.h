@@ -32,12 +32,14 @@ namespace juce
     Components derived from this class can have text dropped onto them by an external application.
 
     @see DragAndDropContainer
+
+    @tags{GUI}
 */
 class JUCE_API  TextDragAndDropTarget
 {
 public:
     /** Destructor. */
-    virtual ~TextDragAndDropTarget()  {}
+    virtual ~TextDragAndDropTarget() = default;
 
     /** Callback to check whether this target is interested in the set of text being offered.
 
@@ -45,7 +47,7 @@ public:
         component, so don't do anything time-consuming in here!
 
         @param text         the text that the user is dragging
-        @returns            true if this component wants to receive the other callbacks regarging this
+        @returns            true if this component wants to receive the other callbacks regarding this
                             type of object; if it returns false, no other callbacks will be made.
     */
     virtual bool isInterestedInTextDrag (const String& text) = 0;

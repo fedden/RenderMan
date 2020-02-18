@@ -24,8 +24,6 @@ namespace juce
 {
 
 class ThreadPool;
-class ThreadPoolThread;
-
 
 //==============================================================================
 /**
@@ -40,6 +38,8 @@ class ThreadPoolThread;
     true, the runJob() method must return immediately.
 
     @see ThreadPool, Thread
+
+    @tags{Core}
 */
 class JUCE_API  ThreadPoolJob
 {
@@ -76,7 +76,7 @@ public:
                                      again when a thread is free. */
     };
 
-    /** Peforms the actual work that this job needs to do.
+    /** Performs the actual work that this job needs to do.
 
         Your subclass must implement this method, in which is does its work.
 
@@ -132,10 +132,9 @@ public:
     //==============================================================================
 private:
     friend class ThreadPool;
-    friend class ThreadPoolThread;
     String jobName;
     ThreadPool* pool = nullptr;
-    bool shouldStop = false, isActive = false, shouldBeDeleted = false;
+    std::atomic<bool> shouldStop { false }, isActive { false }, shouldBeDeleted { false };
     ListenerList<Thread::Listener, Array<Thread::Listener*, CriticalSection>> listeners;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob)
@@ -150,6 +149,8 @@ private:
     will be called by the next pooled thread that becomes free.
 
     @see ThreadPoolJob, Thread
+
+    @tags{Core}
 */
 class JUCE_API  ThreadPool
 {
@@ -190,7 +191,7 @@ public:
     class JUCE_API  JobSelector
     {
     public:
-        virtual ~JobSelector() {}
+        virtual ~JobSelector() = default;
 
         /** Should return true if the specified thread matches your criteria for whatever
             operation that this object is being used for.
@@ -319,10 +320,8 @@ private:
     //==============================================================================
     Array<ThreadPoolJob*> jobs;
 
-    class ThreadPoolThread;
+    struct ThreadPoolThread;
     friend class ThreadPoolJob;
-    friend class ThreadPoolThread;
-    friend struct ContainerDeletePolicy<ThreadPoolThread>;
     OwnedArray<ThreadPoolThread> threads;
 
     CriticalSection lock;
