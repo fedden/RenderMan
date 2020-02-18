@@ -29,7 +29,7 @@
     <FILE id="PqgGm9" name="source.cpp" compile="1" resource="0" file="Source/source.cpp"/>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" extraLinkerFlags="-shared -lpython2.7 -lboost_python"
+    <XCODE_MAC targetFolder="Builds/MacOSX" vst3Folder="VST3_SDK" extraLinkerFlags="-shared -lpython2.7 -lboost_python"
                extraCompilerFlags="-fPIC">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="librenderman.so"
