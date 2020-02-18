@@ -15,7 +15,7 @@
 
 # RenderMan
 
-Renderman is a command line VSTi host written in C++ with Python bindings using [JUCE](https://github.com/julianstorer/JUCE) and [Maximilian](https://github.com/micknoise/Maximilian) libraries for the backend. It is designed with ease of use in mind to extract audio and features from VSTi plugins. It has a fast growing list of features, including setting, getting parameters from synthesiers, setting whole patches, getting random patches, obtaining MFCCS, FFT, audio data and much more.
+Renderman is a command line VSTi host written in C++ with Python bindings using [JUCE 5.4.7](https://github.com/julianstorer/JUCE) and [Maximilian](https://github.com/micknoise/Maximilian) libraries for the backend. It is designed with ease of use in mind to extract audio and features from VSTi plugins. It has a fast growing list of features, including setting, getting parameters from synthesiers, setting whole patches, getting random patches, obtaining MFCCS, FFT, audio data and much more.
 
 A usage example in the form of an IPython notebook can be found [here](http://doc.gold.ac.uk/~lfedd001/renderman.html).
 
@@ -109,8 +109,6 @@ make
 ```
 
 ### Windows
-Install JUCE 5.4.7 or higher. JUCE 5.4.0 stopped including the VST2 SDK. See the "Breaking Changes" section [here](https://juce.com/discover/stories/juce-5-4) and [here](https://forum.juce.com/t/the-removal-of-juce-s-embedded-vst2-sdk/29994/8). If possible, you can try to drop VST2 support by using a preprocessor definition `JUCE_VST3_CAN_REPLACE_VST2=0`. An easier alternative is to download an [older version of JUCE](https://github.com/WeAreROLI/JUCE/tree/a54535bc317b5c005a8cda5c22a9c8d4c6e0c67e). Then move the [VST3\_SDK](https://github.com/WeAreROLI/JUCE/tree/a54535bc317b5c005a8cda5c22a9c8d4c6e0c67e/modules/juce_audio_processors/format_types/VST3_SDK) folder to `C:/tools/VST3_SDK`. Note that this path is the `VST3 SDK Folder` in the Projucer.
-
 Install [Boost 1.71.0-msvc-14.2-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.71.0/boost_1_71_0-msvc-14.2-64.exe/download) and move it to `C:/tools/boost_1_71_0`. It'll take up at least 2 GB.
 
 Install [Python 3.7.x](https://www.python.org/downloads/release/python-375/) to `C:/Python37`. Use [virtualenv](https://docs.python-guide.org/dev/virtualenvs/) to create a virtual environment located at `C:/Python37renderman` (i.e., `virtualenv C:/Python37renderman --python=C:/Python37/python.exe`)
