@@ -107,7 +107,7 @@ void RenderEngine::renderPatch (const uint8  midiNote,
 
     for (int i = 0; i < numberOfBuffers; ++i)
     {
-        // Only trigger one midi note during first buffer
+        // Only trigger one note on during first audio buffer
         if (i > 0)
             midiNoteBuffer.clear();
         
