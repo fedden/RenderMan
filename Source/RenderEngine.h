@@ -20,6 +20,7 @@
 #include "Maximilian/libs/maxiFFT.h"
 #include "Maximilian/libs/maxiMFCC.h"
 #include "../JuceLibraryCode/JuceHeader.h"
+#include <boost/python.hpp>
 
 using namespace juce;
 
@@ -60,6 +61,8 @@ public:
                       const uint8  midiVelocity,
                       const double noteLength,
                       const double renderLength);
+    
+    void renderWav(boost::python::object wav);
 
     const MFCCFeatures getMFCCFrames();
 
@@ -85,13 +88,13 @@ private:
     void fillAudioFeatures (const AudioSampleBuffer& data,
                             maxiFFT&                 fft);
 
-    void ifTimeSetNoteOff (const double& noteLength,
-                           const double& sampleRate,
-                           const int&    bufferSize,
-                           const uint8&  midiChannel,
-                           const uint8&  midiPitch,
-                           const uint8&  midiVelocity,
-                           const int&    currentBufferIndex,
+    void ifTimeSetNoteOff (const double noteLength,
+                           const double sampleRate,
+                           const int    bufferSize,
+                           const uint8  midiChannel,
+                           const uint8  midiPitch,
+                           const uint8  midiVelocity,
+                           const int    currentBufferIndex,
                            MidiBuffer&   bufferToNoteOff);
 
     void fillAvailablePluginParameters (PluginPatch& params);

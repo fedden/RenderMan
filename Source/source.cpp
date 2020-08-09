@@ -10,6 +10,7 @@
 
 #include "PatchGenerator.h"
 #include <boost/python.hpp>
+//#include <boost/python/numpy.hpp>
 
 // Could also easily be namespace crap.
 namespace wrap
@@ -138,6 +139,11 @@ namespace wrap
                                       renderLength);
         }
 
+        void wrapperRenderWav (boost::python::object arr)
+        {
+            RenderEngine::renderWav(arr);
+        }
+        
         boost::python::list wrapperGetMFCCFrames()
         {
             return mfccFramesToListOfLists (RenderEngine::getMFCCFrames());
@@ -195,6 +201,7 @@ BOOST_PYTHON_MODULE(librenderman)
     .def("set_patch", &RenderEngineWrapper::wrapperSetPatch)
     .def("get_patch", &RenderEngineWrapper::wrapperGetPatch)
     .def("render_patch", &RenderEngineWrapper::wrapperRenderPatch)
+    .def("render_wav", &RenderEngineWrapper::wrapperRenderWav)
     .def("get_mfcc_frames", &RenderEngineWrapper::wrapperGetMFCCFrames)
     .def("get_plugin_parameter_size", &RenderEngineWrapper::wrapperGetPluginParameterSize)
     .def("get_plugin_parameters_description", &RenderEngineWrapper::wrapperGetPluginParametersDescription)

@@ -10,6 +10,8 @@
 
 #include "RenderEngine.h"
 
+namespace p = boost::python;
+
 //==============================================================================
 bool RenderEngine::loadPlugin (const std::string& path)
 {
@@ -127,6 +129,71 @@ void RenderEngine::renderPatch (const uint8  midiNote,
 }
 
 //=============================================================================
+void RenderEngine::renderWav(boost::python::object wav)
+{
+    long sampleCount = p::len(wav);
+    // Get the overriden patch and set the vst parameters with it.
+    PluginPatch overridenPatch = getPatch();
+    for (const auto& parameter : overridenPatch)
+        plugin->setParameter (parameter.first, parameter.second);
+
+    // empty MIDI note buffer
+    MidiBuffer midiNoteBuffer;
+
+    // Setup fft here so it is destroyed when rendering is finished and
+    // the stack unwinds so it doesn't share frames with a new patch.
+    maxiFFT fft;
+    fft.setup (fftSize, fftSize / 2, fftSize / 4);
+
+    // Data structure to hold multi-channel audio data.
+    AudioSampleBuffer audioBuffer (plugin->getTotalNumOutputChannels(),
+                                   bufferSize);
+
+    int numberOfBuffers = int (std::ceil (sampleCount / bufferSize));
+
+    // Clear and reserve memory for the audio storage!
+    processedMonoAudioPreview.clear();
+    processedMonoAudioPreview.reserve (numberOfBuffers * bufferSize);
+
+    // Number of FFT, MFCC and RMS frames.
+    int numberOfFFT = int (std::ceil (sampleCount / fftSize)) * 4;
+    rmsFrames.clear();
+    rmsFrames.reserve (numberOfFFT);
+    currentRmsFrame = 0.0;
+    mfccFeatures.clear();
+    mfccFeatures.reserve (numberOfFFT);
+    
+    //wav = wav.astype(np::dtype::get_builtin<double>());
+    
+
+    plugin->prepareToPlay (sampleRate, bufferSize);
+
+    for (int i = 0; i < numberOfBuffers; ++i)
+    {
+        // TODO: SLOW
+        auto writePointers = audioBuffer.getArrayOfWritePointers();
+        int numChannels = audioBuffer.getNumChannels();
+        int remaining = (i < numberOfBuffers - 1) ? bufferSize : (sampleCount % bufferSize);
+        // if buffer size divides sample count, last buffer is full-size
+        remaining = (remaining == 0) ? bufferSize : remaining;
+        
+        for(int j = 0; j < remaining; j++) {
+            double value = p::extract<double>(wav[j + i*bufferSize]);
+            for (int k = 0; k < numChannels; k++) {
+                writePointers[k][j] = value;
+            }
+        }
+        
+        // Turn Midi to audio via the vst.
+        plugin->processBlock (audioBuffer, midiNoteBuffer);
+
+        // Get audio features and fill the datastructure.
+        fillAudioFeatures (audioBuffer, fft);
+    }
+
+}
+
+//=============================================================================
 void RenderEngine::fillAudioFeatures (const AudioSampleBuffer& data,
                                       maxiFFT&                 fft)
 {
@@ -175,14 +242,14 @@ void RenderEngine::fillAudioFeatures (const AudioSampleBuffer& data,
 }
 
 //=============================================================================
-void RenderEngine::ifTimeSetNoteOff (const double& noteLength,
-                                     const double& sampleRate,
-                                     const int&    bufferSize,
-                                     const uint8&  midiChannel,
-                                     const uint8&  midiPitch,
-                                     const uint8&  midiVelocity,
-                                     const int&    currentBufferIndex,
-                                     MidiBuffer&   bufferToNoteOff)
+void RenderEngine::ifTimeSetNoteOff (const double noteLength,
+                                     const double sampleRate,
+                                     const int    bufferSize,
+                                     const uint8  midiChannel,
+                                     const uint8  midiPitch,
+                                     const uint8  midiVelocity,
+                                     const int    currentBufferIndex,
+                                     MidiBuffer&  bufferToNoteOff)
 {
     double eventFrame = noteLength * sampleRate;
     bool bufferBeginIsBeforeEvent = currentBufferIndex * bufferSize < eventFrame;
@@ -334,7 +401,7 @@ const String RenderEngine::getPluginParametersDescription()
             const String index (ss.str());
 
             parameterListString = parameterListString +
-                                  index + ": " + name +
+                                  index + ": " + name + ":" +
                                   "\n";
             ss.str ("");
             ss.clear();
