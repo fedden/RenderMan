@@ -52,7 +52,7 @@ If you haven't already, [get brew](https://brew.sh/). The last time I checked th
 
 Next, get the boost headers.
 ```
-brew install boost-python
+brew install boost-python3
 ```
 
 You can also install boost manually if for some reason you don't want to use brew, [see here.](http://www.boost.org/doc/libs/1_50_0/doc/html/quickbook/install.html)
@@ -61,6 +61,8 @@ Now just open the Xcode project in the Builds directory and build it! There is a
 ```
 mv librenderman.so.dylib librenderman.so
 ```
+
+**IMPORTANT:** The project is linked with libpython3.8 and libboost_python38 and the appropriate include directories. If you have a different version of python installed, run `python3-config --includes --ldflags` to obtain the library and include paths, and update the XCode project to point to the correct locations
 
 ### Linux
 
