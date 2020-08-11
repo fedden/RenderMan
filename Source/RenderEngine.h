@@ -26,6 +26,7 @@ using namespace juce;
 
 typedef std::vector<std::pair<int, float>>  PluginPatch;
 typedef std::vector<std::array<double, 13>> MFCCFeatures;
+typedef std::vector<std::pair<int, std::string>> ParameterNameList;
 
 class RenderEngine
 {
@@ -73,7 +74,7 @@ public:
 
     const size_t getPluginParameterSize();
 
-    const String getPluginParametersDescription();
+    ParameterNameList getPluginParametersDescription();
 
     bool overridePluginParameter (const int   index,
                                   const float value);

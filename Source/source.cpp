@@ -154,9 +154,14 @@ namespace wrap
             return int (RenderEngine::getPluginParameterSize());
         }
 
-        std::string wrapperGetPluginParametersDescription()
+        boost::python::list wrapperGetPluginParametersDescription()
         {
-            return RenderEngine::getPluginParametersDescription().toStdString();
+            //return RenderEngine::getPluginParametersDescription().toStdString();
+            boost::python::list outputList;
+            for (const auto& param : RenderEngine::getPluginParametersDescription()) {
+                outputList.append(boost::python::make_tuple(param.first, param.second));
+            }
+            return outputList;
         }
 
         boost::python::list wrapperGetAudioFrames()

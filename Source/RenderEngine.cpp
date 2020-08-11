@@ -385,9 +385,9 @@ void RenderEngine::fillAvailablePluginParameters (PluginPatch& params)
 }
 
 //==============================================================================
-const String RenderEngine::getPluginParametersDescription()
+ParameterNameList RenderEngine::getPluginParametersDescription()
 {
-    String parameterListString ("");
+    ParameterNameList namedParameters;
 
     if (plugin != nullptr)
     {
@@ -395,24 +395,10 @@ const String RenderEngine::getPluginParametersDescription()
 
         for (const auto& pair : pluginParameters)
         {
-            ss << std::setw (3) << std::setfill (' ') << pair.first;
-
-            const String name = plugin->getParameterName (pair.first);
-            const String index (ss.str());
-
-            parameterListString = parameterListString +
-                                  index + ": " + name + ":" +
-                                  "\n";
-            ss.str ("");
-            ss.clear();
+            namedParameters.push_back(std::make_pair(pair.first, plugin->getParameterName (pair.first).toStdString()));
         }
     }
-    else
-    {
-        std::cout << "Please load the plugin first!" << std::endl;
-    }
-
-    return parameterListString;
+    return namedParameters;
 }
 
 //==============================================================================
