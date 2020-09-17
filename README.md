@@ -112,7 +112,72 @@ make
 
 ### Windows
 
-Windows isn't ready yet, but is in my to-do list. Patches, errors and notes are very welcome here!
+Contribued by the awesome Lior Hakim!
+
+#### Download and Install boost
+Download from 
+https://www.boost.org/users/download/
+extract to c:\boost_1_74_0
+
+```
+cd c:\boost_1_74_0
+bootstrap.bat
+.\b2 --toolset=msvc-14.0 --build-type=complete --prefix=C:\Boost install
+```
+
+#### Download and Install python 3.7.9
+Download from 
+https://www.python.org/downloads/release/python-379/
+
+#### Includes
+Project > Properties > C/C++ > General
+
+Additional Include Directories
+
+``` 
+C:\Boost\include\boost-1_74
+C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\include
+```
+
+#### Libs
+
+Project > Properties > Configuration Properties > VC++ Directories
+
+Library Directories
+
+add
+
+``` 
+C:\Boost\lib
+C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\libs
+```
+
+#### Add defenition
+
+in RenderEngine.h
+after
+```
+#ifndef RENDERENGINE_H_INCLUDED
+#define RENDERENGINE_H_INCLUDED
+```
+add
+```
+#define BOOST_PYTHON_STATIC_LIB
+```
+
+#### Build
+
+rename 
+
+```
+RenderMan\Builds\VisualStudio2019\x64\Debug\Dynamic Library\renderman.dll
+```
+to
+```
+librenderman.pyd
+```
+
+* put the pyd file in the root of the python program
 
 ## Does It Work?
 
