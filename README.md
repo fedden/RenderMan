@@ -52,7 +52,7 @@ If you haven't already, [get brew](https://brew.sh/). The last time I checked th
 
 Next, get the boost headers.
 ```
-brew install boost-python
+brew install boost-python3
 ```
 
 You can also install boost manually if for some reason you don't want to use brew, [see here.](http://www.boost.org/doc/libs/1_50_0/doc/html/quickbook/install.html)
@@ -61,6 +61,8 @@ Now just open the Xcode project in the Builds directory and build it! There is a
 ```
 mv librenderman.so.dylib librenderman.so
 ```
+
+**IMPORTANT:** The project is linked with libpython3.8 and libboost_python38 and the appropriate include directories. If you have a different version of python installed, run `python3-config --includes --ldflags` to obtain the library and include paths, and update the XCode project to point to the correct locations
 
 ### Linux
 
@@ -108,9 +110,68 @@ cd Builds/LinuxMakefile/
 make
 ```
 
-### Windows
+### Windows - VisualStudio2019
 
-Windows isn't ready yet, but is in my to-do list. Patches, errors and notes are very welcome here!
+Download and Install boost
+
+Download from 
+https://www.boost.org/users/download/
+extract to c:\boost_1_74_0
+
+```
+cd c:\boost_1_74_0
+bootstrap.bat
+.\b2 --toolset=msvc-14.0 --build-type=complete --prefix=C:\Boost install
+```
+
+Download and Install python 3.7.9
+
+Download from 
+https://www.python.org/downloads/release/python-379/
+
+Open RenderMan.sln in VisualStudios2019
+
+When prompt to retarget projects
+
+select Windows SDK Version: 8.1
+platform toolset: No Upgrade
+
+add Includes to search path
+Project > Properties > C/C++ > General
+
+Additional Include Directories
+
+``` 
+C:\Boost\include\boost-1_74
+C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\include
+```
+
+add Libs to search path
+
+Project > Properties > Configuration Properties > VC++ Directories
+
+Library Directories
+
+add
+
+``` 
+C:\Boost\lib
+C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\libs
+```
+
+build
+
+after build rename 
+
+```
+RenderMan\Builds\VisualStudio2019\x64\Debug\Dynamic Library\renderman.dll
+```
+to
+```
+librenderman.pyd
+```
+
+*put the pyd file in the root of the python program
 
 ## Does It Work?
 

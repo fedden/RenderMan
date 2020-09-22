@@ -10,12 +10,15 @@
 
 #include "RenderEngine.h"
 
+namespace p = boost::python;
+
 //==============================================================================
-bool RenderEngine::loadPlugin (const std::string& path)
-{
-    OwnedArray<PluginDescription> pluginDescriptions;
-    KnownPluginList pluginList;
-    AudioPluginFormatManager pluginFormatManager;
+
+void RenderEngine::fillAvailablePluginsInfo(const std::string& path,
+                                            AudioPluginFormatManager& pluginFormatManager,
+                                            OwnedArray<PluginDescription>& pluginDescriptions,
+                                            KnownPluginList& pluginList
+                                            ) {
 
     pluginFormatManager.addDefaultFormats();
 
@@ -26,16 +29,49 @@ bool RenderEngine::loadPlugin (const std::string& path)
                                    pluginDescriptions,
                                    *pluginFormatManager.getFormat(i));
     }
+}
+
+
+std::string RenderEngine::getAvailablePluginsXml(const std::string& path) {
+    AudioPluginFormatManager pluginFormatManager;
+    OwnedArray<PluginDescription> pluginDescriptions;
+    KnownPluginList pluginList;
+    fillAvailablePluginsInfo(path, pluginFormatManager, pluginDescriptions, pluginList);
+    
+    XmlElement* ptr = pluginList.createXml();
+    String serialized = ptr->createDocument("");
+    delete ptr;
+    
+    return serialized.toStdString();
+}
+
+
+bool RenderEngine::loadPlugin (const std::string& path, int index)
+{
+    AudioPluginFormatManager pluginFormatManager;
+    OwnedArray<PluginDescription> pluginDescriptions;
+    KnownPluginList pluginList;
+    fillAvailablePluginsInfo(path, pluginFormatManager, pluginDescriptions, pluginList);
 
     // If there is a problem here first check the preprocessor definitions
     // in the projucer are sensible - is it set up to scan for plugin's?
     jassert (pluginDescriptions.size() > 0);
 
+    if (index >= pluginDescriptions.size()) {
+        std::cout << "RenderEngine::loadPlugin error: plugin index " << index
+        << "provided, but only " << pluginDescriptions.size()
+        << "plugins detected" << std::endl;
+        return false;
+    }
+    
     String errorMessage;
 
-    if (plugin != nullptr) delete plugin;
+    if (plugin != nullptr) {
+        plugin->releaseResources();
+        delete plugin;
+    }
 
-    plugin = pluginFormatManager.createPluginInstance (*pluginDescriptions[0],
+    plugin = pluginFormatManager.createPluginInstance (*pluginDescriptions[index],
                                                        sampleRate,
                                                        bufferSize,
                                                        errorMessage);
@@ -127,6 +163,71 @@ void RenderEngine::renderPatch (const uint8  midiNote,
 }
 
 //=============================================================================
+void RenderEngine::renderWav(boost::python::object wav)
+{
+    long sampleCount = p::len(wav);
+    // Get the overriden patch and set the vst parameters with it.
+    PluginPatch overridenPatch = getPatch();
+    for (const auto& parameter : overridenPatch)
+        plugin->setParameter (parameter.first, parameter.second);
+
+    // empty MIDI note buffer
+    MidiBuffer midiNoteBuffer;
+
+    // Setup fft here so it is destroyed when rendering is finished and
+    // the stack unwinds so it doesn't share frames with a new patch.
+    maxiFFT fft;
+    fft.setup (fftSize, fftSize / 2, fftSize / 4);
+
+    // Data structure to hold multi-channel audio data.
+    AudioSampleBuffer audioBuffer (plugin->getTotalNumOutputChannels(),
+                                   bufferSize);
+
+    int numberOfBuffers = int (std::ceil (sampleCount / bufferSize));
+
+    // Clear and reserve memory for the audio storage!
+    processedMonoAudioPreview.clear();
+    processedMonoAudioPreview.reserve (numberOfBuffers * bufferSize);
+
+    // Number of FFT, MFCC and RMS frames.
+    int numberOfFFT = int (std::ceil (sampleCount / fftSize)) * 4;
+    rmsFrames.clear();
+    rmsFrames.reserve (numberOfFFT);
+    currentRmsFrame = 0.0;
+    mfccFeatures.clear();
+    mfccFeatures.reserve (numberOfFFT);
+    
+    //wav = wav.astype(np::dtype::get_builtin<double>());
+    
+
+    plugin->prepareToPlay (sampleRate, bufferSize);
+
+    for (int i = 0; i < numberOfBuffers; ++i)
+    {
+        // TODO: SLOW
+        auto writePointers = audioBuffer.getArrayOfWritePointers();
+        int numChannels = audioBuffer.getNumChannels();
+        int remaining = (i < numberOfBuffers - 1) ? bufferSize : (sampleCount % bufferSize);
+        // if buffer size divides sample count, last buffer is full-size
+        remaining = (remaining == 0) ? bufferSize : remaining;
+        
+        for(int j = 0; j < remaining; j++) {
+            double value = p::extract<double>(wav[j + i*bufferSize]);
+            for (int k = 0; k < numChannels; k++) {
+                writePointers[k][j] = value;
+            }
+        }
+        
+        // Turn Midi to audio via the vst.
+        plugin->processBlock (audioBuffer, midiNoteBuffer);
+
+        // Get audio features and fill the datastructure.
+        fillAudioFeatures (audioBuffer, fft);
+    }
+
+}
+
+//=============================================================================
 void RenderEngine::fillAudioFeatures (const AudioSampleBuffer& data,
                                       maxiFFT&                 fft)
 {
@@ -175,14 +276,14 @@ void RenderEngine::fillAudioFeatures (const AudioSampleBuffer& data,
 }
 
 //=============================================================================
-void RenderEngine::ifTimeSetNoteOff (const double& noteLength,
-                                     const double& sampleRate,
-                                     const int&    bufferSize,
-                                     const uint8&  midiChannel,
-                                     const uint8&  midiPitch,
-                                     const uint8&  midiVelocity,
-                                     const int&    currentBufferIndex,
-                                     MidiBuffer&   bufferToNoteOff)
+void RenderEngine::ifTimeSetNoteOff (const double noteLength,
+                                     const double sampleRate,
+                                     const int    bufferSize,
+                                     const uint8  midiChannel,
+                                     const uint8  midiPitch,
+                                     const uint8  midiVelocity,
+                                     const int    currentBufferIndex,
+                                     MidiBuffer&  bufferToNoteOff)
 {
     double eventFrame = noteLength * sampleRate;
     bool bufferBeginIsBeforeEvent = currentBufferIndex * bufferSize < eventFrame;
@@ -318,9 +419,9 @@ void RenderEngine::fillAvailablePluginParameters (PluginPatch& params)
 }
 
 //==============================================================================
-const String RenderEngine::getPluginParametersDescription()
+ParameterNameList RenderEngine::getPluginParametersDescription()
 {
-    String parameterListString ("");
+    ParameterNameList namedParameters;
 
     if (plugin != nullptr)
     {
@@ -328,24 +429,10 @@ const String RenderEngine::getPluginParametersDescription()
 
         for (const auto& pair : pluginParameters)
         {
-            ss << std::setw (3) << std::setfill (' ') << pair.first;
-
-            const String name = plugin->getParameterName (pair.first);
-            const String index (ss.str());
-
-            parameterListString = parameterListString +
-                                  index + ": " + name +
-                                  "\n";
-            ss.str ("");
-            ss.clear();
+            namedParameters.push_back(std::make_pair(pair.first, plugin->getParameterName (pair.first).toStdString()));
         }
     }
-    else
-    {
-        std::cout << "Please load the plugin first!" << std::endl;
-    }
-
-    return parameterListString;
+    return namedParameters;
 }
 
 //==============================================================================

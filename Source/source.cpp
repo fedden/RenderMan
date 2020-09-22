@@ -10,6 +10,7 @@
 
 #include "PatchGenerator.h"
 #include <boost/python.hpp>
+//#include <boost/python/numpy.hpp>
 
 // Could also easily be namespace crap.
 namespace wrap
@@ -89,7 +90,7 @@ namespace wrap
     PluginPatch listOfTuplesToPluginPatch (boost::python::list listOfTuples)
     {
         PluginPatch patch;
-        const int size = boost::python::len (listOfTuples);
+        const size_t size = boost::python::len (listOfTuples);
         patch.reserve (size);
         std::pair <int, float> parameter;
         for (int i = 0; i < size; ++i)
@@ -138,6 +139,11 @@ namespace wrap
                                       renderLength);
         }
 
+        void wrapperRenderWav (boost::python::object arr)
+        {
+            RenderEngine::renderWav(arr);
+        }
+        
         boost::python::list wrapperGetMFCCFrames()
         {
             return mfccFramesToListOfLists (RenderEngine::getMFCCFrames());
@@ -148,9 +154,14 @@ namespace wrap
             return int (RenderEngine::getPluginParameterSize());
         }
 
-        std::string wrapperGetPluginParametersDescription()
+        boost::python::list wrapperGetPluginParametersDescription()
         {
-            return RenderEngine::getPluginParametersDescription().toStdString();
+            //return RenderEngine::getPluginParametersDescription().toStdString();
+            boost::python::list outputList;
+            for (const auto& param : RenderEngine::getPluginParametersDescription()) {
+                outputList.append(boost::python::make_tuple(param.first, param.second));
+            }
+            return outputList;
         }
 
         boost::python::list wrapperGetAudioFrames()
@@ -161,6 +172,22 @@ namespace wrap
         boost::python::list wrapperGetRMSFrames()
         {
             return vectorToList (RenderEngine::getRMSFrames());
+        }
+        
+        boost::python::dict wrapperGetPluginNames(const std::string& path)
+        {
+            AudioPluginFormatManager pluginFormatManager;
+            OwnedArray<PluginDescription> pluginDescriptions;
+            KnownPluginList pluginList;
+            fillAvailablePluginsInfo(path, pluginFormatManager, pluginDescriptions, pluginList);
+
+            boost::python::dict out;
+            int index = 0;
+            for (const auto& pluginDescription : pluginList) {
+                out[pluginDescription->name.toStdString()] = index;
+                index++;
+            }
+            return out;
         }
     };
 
@@ -191,10 +218,13 @@ BOOST_PYTHON_MODULE(librenderman)
     using namespace wrap;
 
     class_<RenderEngineWrapper>("RenderEngine", init<int, int, int>())
+    .def("get_available_plugins_xml", &RenderEngineWrapper::getAvailablePluginsXml)
+    .def("get_available_plugin_names", &RenderEngineWrapper::wrapperGetPluginNames)
     .def("load_plugin", &RenderEngineWrapper::loadPlugin)
     .def("set_patch", &RenderEngineWrapper::wrapperSetPatch)
     .def("get_patch", &RenderEngineWrapper::wrapperGetPatch)
     .def("render_patch", &RenderEngineWrapper::wrapperRenderPatch)
+    .def("render_wav", &RenderEngineWrapper::wrapperRenderWav)
     .def("get_mfcc_frames", &RenderEngineWrapper::wrapperGetMFCCFrames)
     .def("get_plugin_parameter_size", &RenderEngineWrapper::wrapperGetPluginParameterSize)
     .def("get_plugin_parameters_description", &RenderEngineWrapper::wrapperGetPluginParametersDescription)
