@@ -27,6 +27,8 @@ using namespace juce;
 typedef std::vector<std::pair<int, float>>  PluginPatch;
 typedef std::vector<std::array<double, 13>> MFCCFeatures;
 typedef std::vector<std::pair<int, std::string>> ParameterNameList;
+typedef std::pair<OwnedArray<PluginDescription>, KnownPluginList> PluginsInfo;
+typedef std::vector<std::pair<std::string, int>> PluginNames;
 
 class RenderEngine
 {
@@ -51,9 +53,16 @@ public:
         }
     }
 
+    std::string getAvailablePluginsXml(const std::string& path);
+    
+    void fillAvailablePluginsInfo(const std::string& path,
+                                  AudioPluginFormatManager& pluginFormatManager,
+                                  OwnedArray<PluginDescription>& pluginDescriptions,
+                                  KnownPluginList& pluginList
+                                  );
 
-    bool loadPlugin (const std::string& path);
-
+    bool loadPlugin (const std::string& path, int index = 0);
+    
     void setPatch (const PluginPatch patch);
 
     const PluginPatch getPatch();

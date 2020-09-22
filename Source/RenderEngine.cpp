@@ -13,11 +13,12 @@
 namespace p = boost::python;
 
 //==============================================================================
-bool RenderEngine::loadPlugin (const std::string& path)
-{
-    OwnedArray<PluginDescription> pluginDescriptions;
-    KnownPluginList pluginList;
-    AudioPluginFormatManager pluginFormatManager;
+
+void RenderEngine::fillAvailablePluginsInfo(const std::string& path,
+                                            AudioPluginFormatManager& pluginFormatManager,
+                                            OwnedArray<PluginDescription>& pluginDescriptions,
+                                            KnownPluginList& pluginList
+                                            ) {
 
     pluginFormatManager.addDefaultFormats();
 
@@ -28,16 +29,49 @@ bool RenderEngine::loadPlugin (const std::string& path)
                                    pluginDescriptions,
                                    *pluginFormatManager.getFormat(i));
     }
+}
+
+
+std::string RenderEngine::getAvailablePluginsXml(const std::string& path) {
+    AudioPluginFormatManager pluginFormatManager;
+    OwnedArray<PluginDescription> pluginDescriptions;
+    KnownPluginList pluginList;
+    fillAvailablePluginsInfo(path, pluginFormatManager, pluginDescriptions, pluginList);
+    
+    XmlElement* ptr = pluginList.createXml();
+    String serialized = ptr->createDocument("");
+    delete ptr;
+    
+    return serialized.toStdString();
+}
+
+
+bool RenderEngine::loadPlugin (const std::string& path, int index)
+{
+    AudioPluginFormatManager pluginFormatManager;
+    OwnedArray<PluginDescription> pluginDescriptions;
+    KnownPluginList pluginList;
+    fillAvailablePluginsInfo(path, pluginFormatManager, pluginDescriptions, pluginList);
 
     // If there is a problem here first check the preprocessor definitions
     // in the projucer are sensible - is it set up to scan for plugin's?
     jassert (pluginDescriptions.size() > 0);
 
+    if (index >= pluginDescriptions.size()) {
+        std::cout << "RenderEngine::loadPlugin error: plugin index " << index
+        << "provided, but only " << pluginDescriptions.size()
+        << "plugins detected" << std::endl;
+        return false;
+    }
+    
     String errorMessage;
 
-    if (plugin != nullptr) delete plugin;
+    if (plugin != nullptr) {
+        plugin->releaseResources();
+        delete plugin;
+    }
 
-    plugin = pluginFormatManager.createPluginInstance (*pluginDescriptions[0],
+    plugin = pluginFormatManager.createPluginInstance (*pluginDescriptions[index],
                                                        sampleRate,
                                                        bufferSize,
                                                        errorMessage);
