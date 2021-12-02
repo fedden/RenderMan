@@ -20,11 +20,15 @@
 #include "Maximilian/libs/maxiFFT.h"
 #include "Maximilian/libs/maxiMFCC.h"
 #include "../JuceLibraryCode/JuceHeader.h"
+#include <boost/python.hpp>
 
 using namespace juce;
 
 typedef std::vector<std::pair<int, float>>  PluginPatch;
 typedef std::vector<std::array<double, 13>> MFCCFeatures;
+typedef std::vector<std::pair<int, std::string>> ParameterNameList;
+typedef std::pair<OwnedArray<PluginDescription>, KnownPluginList> PluginsInfo;
+typedef std::vector<std::pair<std::string, int>> PluginNames;
 
 class RenderEngine
 {
@@ -49,9 +53,16 @@ public:
         }
     }
 
+    std::string getAvailablePluginsXml(const std::string& path);
+    
+    void fillAvailablePluginsInfo(const std::string& path,
+                                  AudioPluginFormatManager& pluginFormatManager,
+                                  OwnedArray<PluginDescription>& pluginDescriptions,
+                                  KnownPluginList& pluginList
+                                  );
 
-    bool loadPlugin (const std::string& path);
-
+    bool loadPlugin (const std::string& path, int index = 0);
+    
     void setPatch (const PluginPatch patch);
 
     const PluginPatch getPatch();
@@ -60,6 +71,8 @@ public:
                       const uint8  midiVelocity,
                       const double noteLength,
                       const double renderLength);
+    
+    void renderWav(boost::python::object wav);
 
     const MFCCFeatures getMFCCFrames();
 
@@ -70,7 +83,7 @@ public:
 
     const size_t getPluginParameterSize();
 
-    const String getPluginParametersDescription();
+    ParameterNameList getPluginParametersDescription();
 
     bool overridePluginParameter (const int   index,
                                   const float value);
@@ -85,13 +98,13 @@ private:
     void fillAudioFeatures (const AudioSampleBuffer& data,
                             maxiFFT&                 fft);
 
-    void ifTimeSetNoteOff (const double& noteLength,
-                           const double& sampleRate,
-                           const int&    bufferSize,
-                           const uint8&  midiChannel,
-                           const uint8&  midiPitch,
-                           const uint8&  midiVelocity,
-                           const int&    currentBufferIndex,
+    void ifTimeSetNoteOff (const double noteLength,
+                           const double sampleRate,
+                           const int    bufferSize,
+                           const uint8  midiChannel,
+                           const uint8  midiPitch,
+                           const uint8  midiVelocity,
+                           const int    currentBufferIndex,
                            MidiBuffer&   bufferToNoteOff);
 
     void fillAvailablePluginParameters (PluginPatch& params);
